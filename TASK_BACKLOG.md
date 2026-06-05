@@ -19,7 +19,7 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 - [x] A1.1 Decide monorepo vs two folders; init `apps/api` and `apps/web`
 - [x] A1.2 TypeScript, ESLint, Prettier, editorconfig
 - [x] A1.3 Base scripts: `dev`, `build`, `test`, `lint`, `seed`
-- [ ] A1.4 `.env.example` + config loading (no secrets committed)
+- [x] A1.4 `.env.example` + config loading (no secrets committed)
 - [ ] A1.5 README skeleton (getting started)
 **Accept:** `install → dev` runs an empty app; lint+typecheck pass.
 
