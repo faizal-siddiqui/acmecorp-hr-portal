@@ -15,6 +15,7 @@ from sqlalchemy.engine import Connection
 
 from app.config import settings
 from app.database import Base
+from app import models  # noqa: F401
 
 # Make alembic's logging config take effect if present
 alembic_config = context.config
@@ -22,7 +23,6 @@ if alembic_config.config_file_name is not None:
     fileConfig(alembic_config.config_file_name)
 
 # Metadata from all models — models must be imported before this is used.
-# Models are imported transitively through app.database → app.models (future).
 target_metadata = Base.metadata
 
 
