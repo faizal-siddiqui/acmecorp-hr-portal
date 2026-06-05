@@ -24,7 +24,7 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 **Accept:** `install → dev` runs an empty app; lint+typecheck pass.
 
 ### Story A2 — Database & ORM
-- [ ] A2.1 Add SQLAlchemy 2.0 + Alembic; configure SQLite (dev/test) + Postgres (prod)
+- [x] A2.1 Add SQLAlchemy 2.0 + Alembic; configure SQLite (dev/test) + Postgres (prod)
 - [ ] A2.2 Define schema: employee, compensation, salary_change_history, department, fx_rate, user
 - [ ] A2.3 Add indexes (country, departmentId, level, status, search cols)
 - [ ] A2.4 Initial migration

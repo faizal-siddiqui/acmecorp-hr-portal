@@ -1,0 +1,9 @@
+{
+  "executionEnvironments": [
+    {
+      "root": "apps/api",
+      "venvPath": "apps/api",
+      "venv": ".venv"
+    }
+  ]
+}
