@@ -1,0 +1,8 @@
+## Changes to be done
+
+- Seed Script will have a UI that can be used to push the data 
+- Department, Currency, User, Fix_rate should have data in the architecture.md
+- rate should come from an api that will help to convert the rates to USD
+- gzip, brotli compression if needed
+- Security Headers if needed, remove Headers like X-Server....
+- idempotent
