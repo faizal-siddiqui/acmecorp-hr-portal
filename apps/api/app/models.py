@@ -22,12 +22,14 @@ class Employee(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     employee_code: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    country: Mapped[str] = mapped_column(String(2), nullable=False)  # ISO 3166-1 alpha-2
-    level: Mapped[str] = mapped_column(String(50), nullable=False)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="active")
-    department_id: Mapped[int] = mapped_column(ForeignKey("department.id"), nullable=False)
+    country: Mapped[str] = mapped_column(String(2), index=True, nullable=False)  # ISO 3166-1 alpha-2
+    level: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), index=True, nullable=False, default="active")
+    department_id: Mapped[int] = mapped_column(
+        ForeignKey("department.id"), index=True, nullable=False
+    )
     manager_id: Mapped[Optional[int]] = mapped_column(ForeignKey("employee.id"), nullable=True)
 
     department: Mapped["Department"] = relationship(back_populates="employees")
@@ -40,12 +42,12 @@ class Compensation(Base):
     __tablename__ = "compensation"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    employee_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), nullable=False)
+    employee_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), index=True, nullable=False)
     base_annual: Mapped[int] = mapped_column(Integer, nullable=False)  # Stored as integer
     bonus_annual: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     currency: Mapped[str] = mapped_column(String(3), nullable=False)  # ISO 4217
     effective_date: Mapped[date] = mapped_column(Date, nullable=False)
-    is_current: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_current: Mapped[bool] = mapped_column(Boolean, index=True, nullable=False, default=True)
 
     employee: Mapped["Employee"] = relationship(back_populates="compensations")
 
