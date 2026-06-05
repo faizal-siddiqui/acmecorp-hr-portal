@@ -27,7 +27,7 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 - [x] A2.1 Add SQLAlchemy 2.0 + Alembic; configure SQLite (dev/test) + Postgres (prod)
 - [x] A2.2 Define schema: employee, compensation, salary_change_history, department, fx_rate, user
 - [x] A2.3 Add indexes (country, departmentId, level, status, search cols)
-- [ ] A2.4 Initial migration
+- [x] A2.4 Initial migration
 **Accept:** migrate runs clean on SQLite and Postgres; schema matches `docs/DESIGN_NOTES.md`.
 
 ### Story A3 — Seed script (10,000 employees)
