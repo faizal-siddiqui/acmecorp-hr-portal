@@ -1,0 +1,32 @@
+{
+  "name": "salary-management",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HR salary management — monorepo root scripts",
+  "scripts": {
+    "dev": "concurrently --names API,WEB --prefix-colors cyan,magenta \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "uv run --directory apps/api uvicorn app.main:app --reload --port 8000",
+    "dev:web": "npm run dev --prefix apps/web",
+
+    "build": "npm run build --prefix apps/web",
+
+    "test": "npm run test:api && npm run test:web",
+    "test:api": "uv run --directory apps/api pytest --tb=short -q",
+    "test:web": "echo \"No web tests yet — add in Story G1\"",
+
+    "lint": "npm run lint:api && npm run lint:web",
+    "lint:api": "uv run --directory apps/api ruff check app/ tests/",
+    "lint:web": "npm run lint --prefix apps/web && npm run format:check --prefix apps/web",
+
+    "format": "npm run format:api && npm run format:web",
+    "format:api": "uv run --directory apps/api ruff format app/ tests/",
+    "format:web": "npm run format --prefix apps/web",
+
+    "typecheck": "npm run typecheck --prefix apps/web",
+
+    "seed": "uv run --directory apps/api python -m scripts.seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
