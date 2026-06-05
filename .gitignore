@@ -1,0 +1,61 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# SQLite DB files (dev artefacts — not secrets, but large & auto-generated)
+*.db
+*.db-shm
+*.db-wal
+
+# Alembic (leave migrations tracked; ignore runtime artefacts)
+apps/api/alembic/__pycache__/
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
+
+# ── Node / Next.js ────────────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+# Allow the example template:
+!.env.example
+
+# ── Editor / OS ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+# ── Build / cache artefacts ───────────────────────────────────────────────────
+.pytest_cache/
+.ruff_cache/
+*.tsbuildinfo
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.log
+*.tmp

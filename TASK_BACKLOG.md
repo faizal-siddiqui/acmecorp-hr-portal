@@ -16,7 +16,7 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ### Story A1 — Repo & tooling setup
 **As a developer, I want a clean, typed project skeleton so I can build confidently.**
-- [ ] A1.1 Decide monorepo vs two folders; init `apps/api` and `apps/web`
+- [x] A1.1 Decide monorepo vs two folders; init `apps/api` and `apps/web`
 - [ ] A1.2 TypeScript, ESLint, Prettier, editorconfig
 - [ ] A1.3 Base scripts: `dev`, `build`, `test`, `lint`, `seed`
 - [ ] A1.4 `.env.example` + config loading (no secrets committed)
