@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api";
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
+  const [message, setMessage] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -22,8 +23,9 @@ export default function HomePage() {
     apiFetch("/employees/")
       .then(async (res) => {
         if (res.ok) {
-          // We don't really need the message anymore, 
+          // We don't really need the message anymore,
           // but we can check if it's working.
+          setMessage("Successfully authenticated!");
           setLoading(false);
         }
       })
@@ -47,12 +49,8 @@ export default function HomePage() {
           ACME Corp HR — employee directory, compensation &amp; analytics
         </p>
       </div>
-      
-      {message && (
-        <p className="text-green-600 font-medium">
-          {message}
-        </p>
-      )}
+
+      {message && <p className="font-medium text-green-600">{message}</p>}
 
       <div className="flex gap-4">
         <Link href="/employees">
