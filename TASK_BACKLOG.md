@@ -49,11 +49,11 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 ## EPIC B — Authentication & Security  *(M4, foundations early)*
 ### Story B1 — HR login
 **As Maya, I must log in so salary data isn't public.**
-- [ ] B1.1 *(test first)* auth service tests: valid/invalid creds, token issue/verify
-- [ ] B1.2 `POST /auth/login` → JWT; password hashing (bcrypt/argon2)
-- [ ] B1.3 JWT guard; protect all `/employees`, `/analytics`, `/export` routes
-- [ ] B1.4 Web login page + token storage + auth redirect
-- [ ] B1.5 *(test)* unauthenticated requests rejected (401)
+- [x] B1.1 *(test first)* auth service tests: valid/invalid creds, token issue/verify
+- [x] B1.2 `POST /auth/login` → JWT; password hashing (bcrypt/argon2)
+- [x] B1.3 JWT guard; protect all `/employees`, `/analytics`, `/export` routes
+- [x] B1.4 Web login page + token storage + auth redirect
+- [x] B1.5 *(test)* unauthenticated requests rejected (401)
 **Accept:** unauthenticated API access returns 401; login works end-to-end.
 
 ---
