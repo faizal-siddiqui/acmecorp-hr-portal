@@ -1,10 +1,10 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
 from ..services.employee_service import EmployeeService
-from ..schemas import PaginatedEmployees
+from ..schemas import PaginatedEmployees, EmployeeDetail
 from ..dependencies import get_current_user
 
 router = APIRouter(
@@ -30,3 +30,14 @@ async def get_employees(
     return await service.get_paginated_employees(
         page, page_size, q, country, department, level, status, sort_by, sort_order
     )
+
+@router.get("/{employee_id}", response_model=EmployeeDetail)
+async def get_employee_detail(
+    employee_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    service = EmployeeService(db)
+    employee = await service.get_employee_detail(employee_id)
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    return employee

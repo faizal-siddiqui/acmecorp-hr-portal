@@ -50,6 +50,13 @@ class EmployeeListItem(BaseModel):
     base_usd: float
 
 
+class EmployeeDetail(EmployeeListItem):
+    bonus_annual: int
+    monthly_base: float
+    total_comp: float
+    total_comp_usd: float
+
+
 class PaginatedEmployees(BaseModel):
     items: list[EmployeeListItem]
     total: int

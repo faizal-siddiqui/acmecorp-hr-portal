@@ -77,8 +77,8 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ## EPIC D — Employee Detail, Edit & History  *(M2)*
 ### Story D1 — View employee detail
-- [ ] D1.1 *(test first)* `GET /employees/:id` returns profile + current comp + derived
-- [ ] D1.2 Web detail page (profile, base, bonus, currency, monthly, total comp)
+- [x] D1.1 *(test first)* `GET /employees/:id` returns profile + current comp + derived
+- [x] D1.2 Web detail page (profile, base, bonus, currency, monthly, total comp)
 **Accept:** all fields shown with currency; 404 handled.
 
 ### Story D2 — Edit salary/bonus with validation + history

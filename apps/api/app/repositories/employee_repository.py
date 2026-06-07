@@ -96,3 +96,28 @@ class EmployeeRepository:
         total = total_result.scalar() or 0
         
         return items, total
+
+    async def get_employee_by_id(self, employee_id: int):
+        stmt = select(
+            Employee.id,
+            Employee.employee_code,
+            Employee.first_name,
+            Employee.last_name,
+            Employee.email,
+            Employee.country,
+            Employee.level,
+            Employee.status,
+            Employee.hire_date,
+            Department.name.label("department_name"),
+            Compensation.base_annual,
+            Compensation.bonus_annual,
+            Compensation.currency,
+            FxRate.rate_to_usd,
+            (Compensation.base_annual * FxRate.rate_to_usd).label("base_usd")
+        ).join(Department, Employee.department_id == Department.id) \
+         .join(Compensation, (Employee.id == Compensation.employee_id) & (Compensation.is_current == True)) \
+         .join(FxRate, Compensation.currency == FxRate.currency) \
+         .where(Employee.id == employee_id)
+        
+        result = await self.db.execute(stmt)
+        return result.first()

@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..repositories.employee_repository import EmployeeRepository
-from ..schemas import PaginatedEmployees, EmployeeListItem
+from ..schemas import PaginatedEmployees, EmployeeListItem, EmployeeDetail
 
 class EmployeeService:
     def __init__(self, db: AsyncSession):
@@ -47,4 +47,33 @@ class EmployeeService:
             total=total,
             page=page,
             page_size=page_size
+        )
+
+    async def get_employee_detail(self, employee_id: int) -> Optional[EmployeeDetail]:
+        item = await self.repository.get_employee_by_id(employee_id)
+        if not item:
+            return None
+        
+        monthly_base = item.base_annual / 12
+        total_comp = item.base_annual + item.bonus_annual
+        total_comp_usd = total_comp * item.rate_to_usd
+        
+        return EmployeeDetail(
+            id=item.id,
+            employee_code=item.employee_code,
+            first_name=item.first_name,
+            last_name=item.last_name,
+            email=item.email,
+            country=item.country,
+            level=item.level,
+            status=item.status,
+            hire_date=item.hire_date,
+            department_name=item.department_name,
+            base_annual=item.base_annual,
+            bonus_annual=item.bonus_annual,
+            currency=item.currency,
+            base_usd=item.base_usd,
+            monthly_base=monthly_base,
+            total_comp=total_comp,
+            total_comp_usd=total_comp_usd
         )

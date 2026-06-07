@@ -21,3 +21,41 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   return response;
 }
+
+export interface Employee {
+  id: number;
+  employee_code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  country: string;
+  level: string;
+  status: string;
+  hire_date: string;
+  department_name: string;
+  base_annual: number;
+  currency: string;
+  base_usd: number;
+}
+
+export interface EmployeeDetail extends Employee {
+  bonus_annual: number;
+  monthly_base: number;
+  total_comp: number;
+  total_comp_usd: number;
+}
+
+export async function getEmployees(params: URLSearchParams) {
+  const response = await apiFetch(`/employees/?${params.toString()}`);
+  if (!response.ok) throw new Error("Failed to fetch employees");
+  return response.json();
+}
+
+export async function getEmployee(id: string): Promise<EmployeeDetail> {
+  const response = await apiFetch(`/employees/${id}`);
+  if (!response.ok) {
+    if (response.status === 404) throw new Error("Employee not found");
+    throw new Error("Failed to fetch employee");
+  }
+  return response.json();
+}

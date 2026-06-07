@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { apiFetch } from "@/lib/api";
-import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter } from "lucide-react";
+import { apiFetch, getEmployees, Employee } from "@/lib/api";
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter, ExternalLink } from "lucide-react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -22,22 +23,6 @@ import {
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-
-interface Employee {
-  id: number;
-  employee_code: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  country: string;
-  level: string;
-  status: string;
-  hire_date: string;
-  department_name: string;
-  base_annual: number;
-  currency: string;
-  base_usd: number;
-}
 
 const COUNTRIES = ["US", "GB", "DE", "FR", "IN", "CA", "AU", "SG", "BR", "JP"];
 const DEPARTMENTS = ["Engineering", "Sales", "Marketing", "Finance", "HR", "Operations", "Support", "Product", "Legal", "Design"];
@@ -104,9 +89,8 @@ function EmployeesPageContent() {
           ...(sortOrder && { sort_order: sortOrder }),
         });
 
-        const response = await apiFetch(`/employees/?${params.toString()}`);
-        if (response.ok && !ignore) {
-          const data = await response.json();
+        const data = await getEmployees(params);
+        if (!ignore) {
           setEmployees(data.items);
           setTotal(data.total);
         }
@@ -282,9 +266,17 @@ function EmployeesPageContent() {
               </TableRow>
             ) : (
               employees.map((employee) => (
-                <TableRow key={employee.id}>
+                <TableRow key={employee.id} className="group">
                   <TableCell className="font-mono text-xs text-muted-foreground">{employee.employee_code}</TableCell>
-                  <TableCell className="font-medium">{`${employee.first_name} ${employee.last_name}`}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link 
+                      href={`/employees/${employee.id}`}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      {`${employee.first_name} ${employee.last_name}`}
+                      <ExternalLink className="ml-2 h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </Link>
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{employee.email}</TableCell>
                   <TableCell>{employee.department_name}</TableCell>
                   <TableCell>
