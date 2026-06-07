@@ -18,8 +18,11 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Copy the application code
 COPY . .
 
+# Make entrypoint executable and strip Windows CRLF if present
+RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
+
 # Expose the port
 EXPOSE 8000
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run migrations then start the server
+CMD ["/bin/sh", "entrypoint.sh"]
