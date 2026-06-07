@@ -39,9 +39,9 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 **Accept:** `seed` creates 10k employees fast & idempotently; fixture seed produces known values.
 
 ### Story A4 — CI & containerization
-- [ ] A4.1 GitHub Actions: install, lint, typecheck, test on PR
-- [ ] A4.2 Dockerfile(s) for api + web
-- [ ] A4.3 `docker-compose.yml` (api + web + Postgres)
+- [x] A4.1 GitHub Actions: install, lint, typecheck, test on PR
+- [x] A4.2 Dockerfile(s) for api + web
+- [x] A4.3 `docker-compose.yml` (api + web + Postgres)
 **Accept:** CI green; `docker-compose up` serves the app locally.
 
 ---
