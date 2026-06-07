@@ -130,10 +130,10 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ### Story E2 — Breakdowns by dimension
 
-- [ ] E2.1 _(test first)_ group-by country/department/level: count, avg, median, min, max
-- [ ] E2.2 `GET /analytics/breakdown?groupBy=...`
-- [ ] E2.3 Web tables + simple charts (bar) per dimension
-- [ ] E2.4 Shared filters apply to dashboard + directory
+- [x] E2.1 _(test first)_ group-by country/department/level: count, avg, median, min, max
+- [x] E2.2 `GET /analytics/breakdown?groupBy=...`
+- [x] E2.3 Web tables + simple charts (bar) per dimension
+- [x] E2.4 Shared filters apply to dashboard + directory
       **Accept:** grouped aggregates correct vs fixture; charts render aggregated data only.
 
 ---

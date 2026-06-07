@@ -140,3 +140,65 @@ async def test_get_analytics_summary_with_filters(client: AsyncClient, db_sessio
     data = response.json()
     assert data["headcount"] == 1
     assert data["total_payroll_usd"] == 80000.0
+
+@pytest.mark.asyncio
+async def test_get_analytics_breakdown_success(client: AsyncClient, db_session: AsyncSession):
+    # Setup
+    hashed_password = get_password_hash("testpassword")
+    user = User(email="hr@example.com", password_hash=hashed_password, role="hr")
+    db_session.add(user)
+    await db_session.flush()
+
+    dept_eng = Department(name="Engineering")
+    dept_hr = Department(name="HR")
+    db_session.add_all([dept_eng, dept_hr])
+    await db_session.flush()
+
+    fx_usd = FxRate(currency="USD", rate_to_usd=1.0, as_of=date(2026, 6, 5))
+    db_session.add(fx_usd)
+    await db_session.flush()
+
+    # Eng: 100k, 120k -> avg 110k, median 110k, min 100k, max 120k
+    emp1 = Employee(employee_code="E1", first_name="A", last_name="A", email="a@ex.com", country="US", level="L3", status="active", hire_date=date(2020, 1, 1), department_id=dept_eng.id)
+    emp2 = Employee(employee_code="E2", first_name="B", last_name="B", email="b@ex.com", country="US", level="L3", status="active", hire_date=date(2020, 1, 1), department_id=dept_eng.id)
+    # HR: 80k
+    emp3 = Employee(employee_code="E3", first_name="C", last_name="C", email="c@ex.com", country="DE", level="L2", status="active", hire_date=date(2020, 1, 1), department_id=dept_hr.id)
+    db_session.add_all([emp1, emp2, emp3])
+    await db_session.flush()
+
+    c1 = Compensation(employee_id=emp1.id, base_annual=100000, bonus_annual=0, currency="USD", effective_date=date(2020, 1, 1), is_current=True)
+    c2 = Compensation(employee_id=emp2.id, base_annual=120000, bonus_annual=0, currency="USD", effective_date=date(2020, 1, 1), is_current=True)
+    c3 = Compensation(employee_id=emp3.id, base_annual=80000, bonus_annual=0, currency="USD", effective_date=date(2020, 1, 1), is_current=True)
+    db_session.add_all([c1, c2, c3])
+    await db_session.commit()
+
+    login_response = await client.post("/auth/login", json={"email": "hr@example.com", "password": "testpassword"})
+    token = login_response.json()["access_token"]
+
+    # Breakdown by department
+    response = await client.get("/analytics/breakdown?group_by=department", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["group_by"] == "department"
+    assert len(data["items"]) == 2
+    
+    eng = next(item for item in data["items"] if item["dimension_value"] == "Engineering")
+    assert eng["count"] == 2
+    assert eng["avg_usd"] == 110000.0
+    assert eng["median_usd"] == 110000.0
+    assert eng["min_usd"] == 100000.0
+    assert eng["max_usd"] == 120000.0
+
+    hr = next(item for item in data["items"] if item["dimension_value"] == "HR")
+    assert hr["count"] == 1
+    assert hr["avg_usd"] == 80000.0
+
+    # Breakdown by country
+    response = await client.get("/analytics/breakdown?group_by=country", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["items"]) == 2
+    us = next(item for item in data["items"] if item["dimension_value"] == "US")
+    assert us["count"] == 2
+    de = next(item for item in data["items"] if item["dimension_value"] == "DE")
+    assert de["count"] == 1

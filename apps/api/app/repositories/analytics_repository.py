@@ -67,3 +67,81 @@ class AnalyticsRepository:
             "median_payroll_usd": statistics.median(salaries),
             "fx_as_of": fx_as_of
         }
+
+    async def get_breakdown_data(
+        self,
+        group_by: str,
+        q: Optional[str] = None,
+        country: Optional[str] = None,
+        department: Optional[str] = None,
+        level: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        # Map group_by string to actual column
+        group_col_map = {
+            "country": Employee.country,
+            "department": Department.name,
+            "level": Employee.level
+        }
+        
+        if group_by not in group_col_map:
+            raise ValueError(f"Invalid group_by: {group_by}")
+            
+        group_col = group_col_map[group_by]
+
+        # We need to get all salaries for each group to calculate median
+        # For other aggregates, we could use SQL func, but for consistency and median, 
+        # we'll fetch and group in Python for now. 
+        # Given 10k records, this is still very fast.
+        
+        stmt = select(
+            group_col.label("dimension_value"),
+            ((Compensation.base_annual + Compensation.bonus_annual) * FxRate.rate_to_usd).label("total_usd")
+        ).select_from(Compensation) \
+         .join(Employee, Employee.id == Compensation.employee_id) \
+         .join(Department, Employee.department_id == Department.id) \
+         .join(FxRate, Compensation.currency == FxRate.currency) \
+         .where(Employee.status == "active") \
+         .where(Compensation.is_current == True)
+
+        # Apply filters
+        if q:
+            search_filter = or_(
+                Employee.first_name.ilike(f"%{q}%"),
+                Employee.last_name.ilike(f"%{q}%"),
+                Employee.email.ilike(f"%{q}%"),
+                Employee.employee_code.ilike(f"%{q}%")
+            )
+            stmt = stmt.where(search_filter)
+        
+        if country:
+            stmt = stmt.where(Employee.country == country)
+        if department:
+            stmt = stmt.where(Department.name == department)
+        if level:
+            stmt = stmt.where(Employee.level == level)
+
+        result = await self.db.execute(stmt)
+        rows = result.all()
+
+        # Group by dimension_value
+        groups: Dict[str, List[float]] = {}
+        for row in rows:
+            val = str(row.dimension_value)
+            if val not in groups:
+                groups[val] = []
+            groups[val].append(float(row.total_usd))
+
+        breakdown = []
+        for val, salaries in groups.items():
+            breakdown.append({
+                "dimension_value": val,
+                "count": len(salaries),
+                "avg_usd": sum(salaries) / len(salaries),
+                "median_usd": statistics.median(salaries),
+                "min_usd": min(salaries),
+                "max_usd": max(salaries)
+            })
+
+        # Sort by dimension value for consistent output
+        breakdown.sort(key=lambda x: x["dimension_value"])
+        return breakdown

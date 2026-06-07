@@ -116,3 +116,17 @@ class AnalyticsSummary(BaseModel):
     avg_payroll_usd: float
     median_payroll_usd: float
     fx_as_of: date
+
+
+class AnalyticsBreakdownItem(BaseModel):
+    dimension_value: str
+    count: int
+    avg_usd: float
+    median_usd: float
+    min_usd: float
+    max_usd: float
+
+
+class AnalyticsBreakdown(BaseModel):
+    group_by: str
+    items: list[AnalyticsBreakdownItem]

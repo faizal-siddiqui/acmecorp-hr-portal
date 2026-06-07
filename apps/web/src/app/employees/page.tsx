@@ -7,6 +7,7 @@ import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter, ExternalLink, UserPlus
 import Link from "next/link";
 import { EmployeeCreateForm } from "@/components/EmployeeCreateForm";
 import { AnalyticsKPIs } from "@/components/AnalyticsKPIs";
+import { AnalyticsBreakdown } from "@/components/AnalyticsBreakdown";
 import {
   Table,
   TableBody,
@@ -174,6 +175,10 @@ function EmployeesPageContent() {
       </div>
 
       <AnalyticsKPIs />
+
+      <div className="mb-8">
+        <AnalyticsBreakdown />
+      </div>
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">

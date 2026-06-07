@@ -158,3 +158,23 @@ export async function getAnalyticsSummary(params: URLSearchParams): Promise<Anal
   if (!response.ok) throw new Error("Failed to fetch analytics summary");
   return response.json();
 }
+
+export interface AnalyticsBreakdownItem {
+  dimension_value: string;
+  count: number;
+  avg_usd: number;
+  median_usd: number;
+  min_usd: number;
+  max_usd: number;
+}
+
+export interface AnalyticsBreakdown {
+  group_by: string;
+  items: AnalyticsBreakdownItem[];
+}
+
+export async function getAnalyticsBreakdown(params: URLSearchParams): Promise<AnalyticsBreakdown> {
+  const response = await apiFetch(`/analytics/breakdown?${params.toString()}`);
+  if (!response.ok) throw new Error("Failed to fetch analytics breakdown");
+  return response.json();
+}
