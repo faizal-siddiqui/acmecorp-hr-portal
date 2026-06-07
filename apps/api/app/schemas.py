@@ -108,3 +108,11 @@ class Department(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     name: str
+
+
+class AnalyticsSummary(BaseModel):
+    headcount: int
+    total_payroll_usd: float
+    avg_payroll_usd: float
+    median_payroll_usd: float
+    fx_as_of: date

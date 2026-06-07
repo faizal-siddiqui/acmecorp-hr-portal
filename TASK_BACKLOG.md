@@ -122,10 +122,10 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ### Story E1 — Org summary KPIs
 
-- [ ] E1.1 _(test first)_ avg & **median** + total payroll math vs fixture (exact values)
-- [ ] E1.2 _(test first)_ FX normalization to USD via fx_rate
-- [ ] E1.3 `GET /analytics/summary` (respects filters)
-- [ ] E1.4 Web KPI cards (headcount, total payroll USD, avg, median; fx asOf label)
+- [x] E1.1 _(test first)_ avg & **median** + total payroll math vs fixture (exact values)
+- [x] E1.2 _(test first)_ FX normalization to USD via fx_rate
+- [x] E1.3 `GET /analytics/summary` (respects filters)
+- [x] E1.4 Web KPI cards (headcount, total payroll USD, avg, median; fx asOf label)
       **Accept:** numbers match fixture exactly; normalized-USD clearly labeled; P95 < 300 ms.
 
 ### Story E2 — Breakdowns by dimension

@@ -144,3 +144,17 @@ export async function getDepartments(): Promise<Department[]> {
   if (!response.ok) throw new Error("Failed to fetch departments");
   return response.json();
 }
+
+export interface AnalyticsSummary {
+  headcount: number;
+  total_payroll_usd: number;
+  avg_payroll_usd: number;
+  median_payroll_usd: number;
+  fx_as_of: string;
+}
+
+export async function getAnalyticsSummary(params: URLSearchParams): Promise<AnalyticsSummary> {
+  const response = await apiFetch(`/analytics/summary?${params.toString()}`);
+  if (!response.ok) throw new Error("Failed to fetch analytics summary");
+  return response.json();
+}

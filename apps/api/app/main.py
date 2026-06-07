@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import auth, employees
+from .routers import auth, employees, analytics
 
 app = FastAPI(
     title="Salary Management API",
@@ -22,6 +22,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(employees.router)
+app.include_router(analytics.router)
 
 
 @app.get("/health", tags=["meta"])

@@ -6,6 +6,7 @@ import { apiFetch, getEmployees, Employee } from "@/lib/api";
 import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter, ExternalLink, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { EmployeeCreateForm } from "@/components/EmployeeCreateForm";
+import { AnalyticsKPIs } from "@/components/AnalyticsKPIs";
 import {
   Table,
   TableBody,
@@ -171,6 +172,8 @@ function EmployeesPageContent() {
           </div>
         </div>
       </div>
+
+      <AnalyticsKPIs />
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
