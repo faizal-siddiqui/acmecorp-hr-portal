@@ -1,5 +1,7 @@
+import random
 from faker import Faker
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
+from datetime import date, timedelta
 
 # Fixed seed for reproducibility
 DEFAULT_SEED = 42
@@ -65,8 +67,10 @@ class DataGenerator:
 
     def random_level(self) -> str:
         # Weighted distribution: more junior/mid than principal
+        # L1: 20%, L2: 25%, L3: 25%, L4: 15%, L5: 10%, L6: 4%, L7: 1%
+        elements = LEVELS
         weights = [0.2, 0.25, 0.25, 0.15, 0.1, 0.04, 0.01]
-        return self.fake.random_element(elements=LEVELS) # Faker doesn't support weights in random_element directly easily without choices
+        return random.choices(elements, weights=weights, k=1)[0]
 
     def get_salary_for_level(self, level: str, country_code: str) -> int:
         """
@@ -75,9 +79,55 @@ class DataGenerator:
         """
         country = next(c for c in COUNTRIES if c["code"] == country_code)
         min_usd, max_usd = SALARY_BANDS[level]
-        
+
         # Apply cost factor
         min_adj = int(min_usd * country["cost_factor"])
         max_adj = int(max_usd * country["cost_factor"])
-        
+
         return self.fake.random_int(min=min_adj, max=max_adj)
+
+    def get_bonus_for_level(self, level: str, base_salary: int) -> int:
+        """
+        Generates a realistic annual bonus.
+        Higher levels typically have higher bonus percentages.
+        """
+        bonus_pct_map = {
+            "L1": (0, 0.05),
+            "L2": (0, 0.10),
+            "L3": (0.05, 0.15),
+            "L4": (0.10, 0.20),
+            "L5": (0.15, 0.30),
+            "L6": (0.20, 0.40),
+            "L7": (0.30, 0.60),
+        }
+        min_pct, max_pct = bonus_pct_map[level]
+        bonus_pct = self.fake.pyfloat(min_value=min_pct, max_value=max_pct)
+        return int(base_salary * bonus_pct)
+
+    def random_hire_date(self) -> date:
+        """Generates a hire date within the last 10 years."""
+        end_date = date.today()
+        start_date = end_date - timedelta(days=365 * 10)
+        return self.fake.date_between(start_date=start_date, end_date=end_date)
+
+    def random_status(self) -> str:
+        """Generates a status: 95% active, 5% inactive."""
+        return random.choices(["active", "inactive"], weights=[0.95, 0.05], k=1)[0]
+
+    def generate_employee_basic(self, level: str, country: Dict) -> Dict:
+        """Generates basic employee info (name, email, code)."""
+        first_name = self.fake.first_name()
+        last_name = self.fake.last_name()
+        # Use unique email to avoid collisions in large seeds
+        email = self.fake.unique.email()
+        employee_code = f"EMP-{self.fake.unique.random_number(digits=6, fix_len=True)}"
+
+        return {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "employee_code": employee_code,
+            "level": level,
+            "country": country["code"],
+            "status": self.random_status(),
+        }
