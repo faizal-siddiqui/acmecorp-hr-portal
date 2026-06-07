@@ -1,6 +1,7 @@
 import asyncio
 import random
 import sys
+import bcrypt
 from datetime import date
 from typing import List, Dict, Optional
 
@@ -59,11 +60,10 @@ async def seed_fx_rates(session: AsyncSession):
 async def seed_hr_user(session: AsyncSession):
     """Seeds one HR manager user."""
     print("Seeding HR user...")
-    # Using a simple hash if bcrypt is being problematic in this environment
-    # but ideally we want to match what the app uses.
-    # For now, let's try to use pbkdf2_sha256 which is more stable across environments.
-    hr_pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
-    hashed_password = hr_pwd_context.hash("admin123")
+    # Use bcrypt directly to match app/auth.py
+    password = "admin123"
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
     user = User(
         email="maya@example.com",
         password_hash=hashed_password,

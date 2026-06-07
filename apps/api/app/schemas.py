@@ -29,3 +29,27 @@ class TokenData(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+class EmployeeListItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    employee_code: str
+    first_name: str
+    last_name: str
+    email: str
+    country: str
+    level: str
+    status: str
+    department_name: str
+    base_annual: int
+    currency: str
+    base_usd: float
+
+
+class PaginatedEmployees(BaseModel):
+    items: list[EmployeeListItem]
+    total: int
+    page: int
+    page_size: int

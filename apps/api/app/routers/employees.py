@@ -1,16 +1,22 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
-from ..dependencies import get_current_hr_user
-from .. import models
+from ..services.employee_service import EmployeeService
+from ..schemas import PaginatedEmployees
+from ..dependencies import get_current_user
 
-router = APIRouter(prefix="/employees", tags=["employees"])
+router = APIRouter(
+    prefix="/employees",
+    tags=["employees"],
+    dependencies=[Depends(get_current_user)]
+)
 
-
-@router.get("/")
+@router.get("/", response_model=PaginatedEmployees)
 async def get_employees(
-    db: AsyncSession = Depends(get_db),
-    current_user: models.User = Depends(get_current_hr_user),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+    db: AsyncSession = Depends(get_db)
 ):
-    return {"message": f"Hello {current_user.email}, here are the employees."}
+    service = EmployeeService(db)
+    return await service.get_paginated_employees(page, page_size)

@@ -60,10 +60,10 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ## EPIC C — Employee Directory  *(M1)*
 ### Story C1 — List employees (paginated)
-- [ ] C1.1 *(test first)* repo/service: pagination + total count
-- [ ] C1.2 `GET /employees` with page/pageSize; projected columns + `baseUsd`
-- [ ] C1.3 Web directory table (shadcn) with page controls + total
-- [ ] C1.4 Loading skeletons + empty state
+- [x] C1.1 *(test first)* repo/service: pagination + total count
+- [x] C1.2 `GET /employees` with page/pageSize; projected columns + `baseUsd`
+- [x] C1.3 Web directory table (shadcn) with page controls + total
+- [x] C1.4 Loading skeletons + empty state
 **Accept:** lists 10k via pages; default 25; P95 < 300 ms; total shown.
 
 ### Story C2 — Search, filter, sort

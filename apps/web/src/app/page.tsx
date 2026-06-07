@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
+  const [userRole, setUserRole] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -17,15 +18,16 @@ export default function HomePage() {
       return;
     }
 
-    // Test protected route
+    // Test protected route and get role
     apiFetch("/employees/")
       .then(async (res) => {
         if (res.ok) {
-          const data = await res.json();
-          setMessage(data.message);
+          // We don't really need the message anymore, 
+          // but we can check if it's working.
+          setLoading(false);
         }
       })
-      .finally(() => setLoading(false));
+      .catch(() => setLoading(false));
   }, [router]);
 
   const handleLogout = () => {
@@ -53,6 +55,9 @@ export default function HomePage() {
       )}
 
       <div className="flex gap-4">
+        <Link href="/employees">
+          <Button>View Employee Directory</Button>
+        </Link>
         <Button variant="outline" onClick={handleLogout}>
           Logout
         </Button>
