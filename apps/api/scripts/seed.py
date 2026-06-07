@@ -10,9 +10,18 @@ Usage:
 """
 
 
+from scripts.generators import DataGenerator, COUNTRIES, DEPARTMENTS, LEVELS
+
+
 def main() -> None:
-    print("Seed script not yet implemented -- coming in Story A3.")
-    print("Will create 10 000 employees, fx_rates, and one HR user.")
+    print("Seed script starting...")
+    gen = DataGenerator(seed=42)
+    
+    # Placeholder for Story A3.2 and A3.3
+    print(f"Loaded {len(COUNTRIES)} countries and {len(DEPARTMENTS)} departments.")
+    print(f"Ready to generate 10,000 employees across {len(LEVELS)} levels.")
+    
+    print("Seed script not yet fully implemented -- coming in Story A3.2/A3.3.")
 
 
 if __name__ == "__main__":

@@ -31,7 +31,7 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 **Accept:** migrate runs clean on SQLite and Postgres; schema matches `docs/DESIGN_NOTES.md`.
 
 ### Story A3 — Seed script (10,000 employees)
-- [ ] A3.1 Fixed-seed faker generators (countries+currencies, departments, levels, bands)
+- [x] A3.1 Fixed-seed faker generators (countries+currencies, departments, levels, bands)
 - [ ] A3.2 Country-adjusted salary bands by level; manager hierarchy; hire dates; statuses
 - [ ] A3.3 Batched/idempotent inserts; seed fx_rate + one HR user
 - [ ] A3.4 Tiny deterministic **20-row fixture** seed for tests
