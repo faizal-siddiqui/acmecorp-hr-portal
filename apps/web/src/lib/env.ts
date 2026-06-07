@@ -12,5 +12,5 @@ function readEnv(name: string, fallback?: string): string {
 }
 
 export const env = {
-  apiUrl: readEnv("NEXT_PUBLIC_API_URL", "http://localhost:8000"),
+  apiUrl: readEnv("NEXT_PUBLIC_API_URL"),
 } as const;

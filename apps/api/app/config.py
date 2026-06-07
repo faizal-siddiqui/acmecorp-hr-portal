@@ -16,12 +16,15 @@ class Settings(BaseSettings):
     )
 
     # Database
-    database_url: str = "sqlite+aiosqlite:///./salary.db"
+    database_url: str
 
     # Auth
-    secret_key: str = "change-me-in-production"
+    secret_key: str
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 8  # 8 hours
+
+    # Seeding
+    seed_admin_password: str
 
     # CORS — comma-separated in .env (e.g. http://localhost:3000,http://127.0.0.1:3000)
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:3000"]

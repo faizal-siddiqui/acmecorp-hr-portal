@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from passlib.context import CryptContext
 
+from app.config import settings
 from app.database import AsyncSessionLocal, engine, Base
 from app.models import Employee, Department, Compensation, User, FxRate
 from scripts.generators import DataGenerator, COUNTRIES, DEPARTMENTS, LEVELS
@@ -61,7 +62,7 @@ async def seed_hr_user(session: AsyncSession):
     """Seeds one HR manager user."""
     print("Seeding HR user...")
     # Use bcrypt directly to match app/auth.py
-    password = "admin123"
+    password = settings.seed_admin_password
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
     user = User(
