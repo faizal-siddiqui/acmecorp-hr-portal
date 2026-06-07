@@ -1,6 +1,7 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_, desc, update
+from sqlalchemy.orm import joinedload
 from ..models import Employee, Department, Compensation, FxRate, SalaryChangeHistory
 
 class EmployeeRepository:
@@ -145,3 +146,12 @@ class EmployeeRepository:
 
     async def add_history_records(self, history_records: List[SalaryChangeHistory]):
         self.db.add_all(history_records)
+
+    async def get_salary_history(self, employee_id: int) -> List[SalaryChangeHistory]:
+        stmt = select(SalaryChangeHistory).where(
+            SalaryChangeHistory.employee_id == employee_id
+        ).options(joinedload(SalaryChangeHistory.changed_by_user)) \
+         .order_by(SalaryChangeHistory.changed_at.desc())
+        
+        result = await self.db.execute(stmt)
+        return result.scalars().all()

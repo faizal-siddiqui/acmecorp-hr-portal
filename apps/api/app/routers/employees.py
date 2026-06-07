@@ -1,10 +1,10 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
 from ..services.employee_service import EmployeeService
-from ..schemas import PaginatedEmployees, EmployeeDetail, CompensationUpdate
+from ..schemas import PaginatedEmployees, EmployeeDetail, CompensationUpdate, SalaryHistoryItem
 from ..dependencies import get_current_user
 from ..models import User
 
@@ -55,3 +55,11 @@ async def update_compensation(
         return await service.update_compensation(employee_id, update_data, current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/{employee_id}/history", response_model=List[SalaryHistoryItem])
+async def get_employee_history(
+    employee_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    service = EmployeeService(db)
+    return await service.get_employee_salary_history(employee_id)

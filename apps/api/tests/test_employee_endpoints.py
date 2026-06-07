@@ -3,7 +3,7 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.main import app
 from app.database import get_db
-from app.models import User, Employee, Department, Compensation, FxRate
+from app.models import User, Employee, Department, Compensation, FxRate, SalaryChangeHistory
 from app.auth import get_password_hash
 from datetime import date
 
@@ -114,3 +114,45 @@ async def test_patch_compensation_invalid_data(client: AsyncClient, db_session: 
 
     # Verify
     assert response.status_code == 422 # Pydantic validation error
+
+@pytest.mark.asyncio
+async def test_get_history_endpoint(client: AsyncClient, db_session: AsyncSession):
+    # Setup
+    hashed_password = get_password_hash("testpassword")
+    user = User(email="hr@example.com", password_hash=hashed_password, role="hr")
+    db_session.add(user)
+    await db_session.flush()
+
+    emp = Employee(
+        employee_code="E1", first_name="Alice", last_name="Zebra", 
+        email="alice@example.com", country="US", level="L3", status="active",
+        hire_date=date(2020, 1, 1), department_id=1
+    )
+    db_session.add(emp)
+    await db_session.flush()
+
+    h1 = SalaryChangeHistory(
+        employee_id=emp.id, field="base_annual", old_value="100000", new_value="110000",
+        changed_by=user.id
+    )
+    db_session.add(h1)
+    await db_session.commit()
+
+    # Login to get token
+    login_response = await client.post(
+        "/auth/login",
+        json={"email": "hr@example.com", "password": "testpassword"}
+    )
+    token = login_response.json()["access_token"]
+
+    # Execute GET history
+    response = await client.get(
+        f"/employees/{emp.id}/history",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["field"] == "base_annual"
+    assert data[0]["changed_by_email"] == "hr@example.com"

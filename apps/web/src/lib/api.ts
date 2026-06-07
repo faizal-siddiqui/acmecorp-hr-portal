@@ -78,3 +78,20 @@ export async function updateCompensation(id: number, data: CompensationUpdate) {
   }
   return response.json();
 }
+
+export interface SalaryHistoryItem {
+  id: number;
+  employee_id: number;
+  field: string;
+  old_value: string | null;
+  new_value: string;
+  changed_by_email: string;
+  changed_at: string;
+  note: string | null;
+}
+
+export async function getEmployeeHistory(id: string): Promise<SalaryHistoryItem[]> {
+  const response = await apiFetch(`/employees/${id}/history`);
+  if (!response.ok) throw new Error("Failed to fetch employee history");
+  return response.json();
+}

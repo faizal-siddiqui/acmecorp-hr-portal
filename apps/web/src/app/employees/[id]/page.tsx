@@ -14,11 +14,13 @@ import {
   TrendingUp,
   Clock,
   ShieldCheck,
-  Edit
+  Edit,
+  History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompensationEditForm } from "@/components/CompensationEditForm";
+import { CompensationHistory } from "@/components/CompensationHistory";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -31,6 +33,7 @@ export default function EmployeeDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [refreshHistory, setRefreshHistory] = useState(0);
 
   const fetchEmployee = async () => {
     try {
@@ -208,6 +211,18 @@ export default function EmployeeDetailPage({ params }: PageProps) {
               </div>
             </div>
           </div>
+
+          {/* Change History */}
+          <div className="bg-card rounded-xl border shadow-sm p-8">
+            <h2 className="text-xl font-bold mb-8 flex items-center">
+              <History className="h-5 w-5 mr-2 text-primary" />
+              Change History
+            </h2>
+            <CompensationHistory 
+              employeeId={resolvedParams.id} 
+              refreshTrigger={refreshHistory} 
+            />
+          </div>
         </div>
 
         {/* Sidebar */}
@@ -248,7 +263,10 @@ export default function EmployeeDetailPage({ params }: PageProps) {
         <CompensationEditForm 
           employee={employee} 
           onClose={() => setIsEditModalOpen(false)}
-          onSuccess={() => fetchEmployee()}
+          onSuccess={() => {
+            fetchEmployee();
+            setRefreshHistory(prev => prev + 1);
+          }}
         />
       )}
     </div>

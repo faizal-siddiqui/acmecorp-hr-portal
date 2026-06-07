@@ -105,8 +105,8 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ### Story D3 — Salary change history view
 
-- [ ] D3.1 _(test)_ `GET /employees/:id/history` newest-first, immutable
-- [ ] D3.2 Web history panel/timeline
+- [x] D3.1 _(test)_ `GET /employees/:id/history` newest-first, immutable
+- [x] D3.2 Web history panel/timeline
       **Accept:** every edit appears; never editable/deletable.
 
 ### Story D4 — Create & deactivate employee

@@ -4,7 +4,7 @@ from sqlalchemy import select
 from app.services.employee_service import EmployeeService
 from app.models import Employee, Department, Compensation, FxRate, User, SalaryChangeHistory
 from app.schemas import CompensationUpdate
-from datetime import date
+from datetime import date, datetime
 
 @pytest.mark.asyncio
 async def test_update_compensation_success(db_session: AsyncSession):
@@ -113,3 +113,42 @@ async def test_update_compensation_invalid_currency(db_session: AsyncSession):
     with pytest.raises(ValueError) as excinfo:
         await service.update_compensation(emp.id, update_data, user.id)
     assert "Currency EUR not found" in str(excinfo.value)
+
+@pytest.mark.asyncio
+async def test_get_salary_history(db_session: AsyncSession):
+    # Setup
+    dept = Department(name="Engineering")
+    db_session.add(dept)
+    await db_session.flush()
+
+    user = User(email="admin@example.com", password_hash="hash", role="admin")
+    db_session.add(user)
+    await db_session.flush()
+
+    emp = Employee(
+        employee_code="E1", first_name="Alice", last_name="Zebra", 
+        email="alice@example.com", country="US", level="L3", status="active",
+        hire_date=date(2020, 1, 1), department_id=dept.id
+    )
+    db_session.add(emp)
+    await db_session.flush()
+
+    # Add some history
+    h1 = SalaryChangeHistory(
+        employee_id=emp.id, field="base_annual", old_value="100000", new_value="110000",
+        changed_by=user.id, changed_at=datetime(2026, 1, 1)
+    )
+    h2 = SalaryChangeHistory(
+        employee_id=emp.id, field="base_annual", old_value="110000", new_value="120000",
+        changed_by=user.id, changed_at=datetime(2026, 2, 1)
+    )
+    db_session.add_all([h1, h2])
+    await db_session.commit()
+
+    service = EmployeeService(db_session)
+    history = await service.get_employee_salary_history(emp.id)
+
+    assert len(history) == 2
+    assert history[0].new_value == "120000" # Newest first
+    assert history[1].new_value == "110000"
+    assert history[0].changed_by_email == "admin@example.com"

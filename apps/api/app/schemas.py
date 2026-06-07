@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
@@ -69,3 +69,16 @@ class CompensationUpdate(BaseModel):
     bonus_annual: int = Field(..., ge=0)
     currency: str = Field(..., min_length=3, max_length=3)
     effective_date: date
+
+
+class SalaryHistoryItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    employee_id: int
+    field: str
+    old_value: Optional[str]
+    new_value: str
+    changed_by_email: str
+    changed_at: datetime
+    note: Optional[str]
