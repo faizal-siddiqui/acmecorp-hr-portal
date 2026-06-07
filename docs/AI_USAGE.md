@@ -83,3 +83,4 @@ AI collaboration auditable, per the rubric's "AI usage effectiveness".
 | Date | Intent | Outcome / human change |
 |------|--------|------------------------|
 | (M0) | Generate requirements + artifacts + backlog | Accepted with edits to scope assumptions and non-goals |
+| 2026-06-07 | Update documentation & DX (Story G3) | Updated root README with 5-min path, API summary, env vars, and deployment notes. |

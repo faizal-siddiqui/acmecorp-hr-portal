@@ -167,9 +167,9 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ### Story G3 — Documentation & DX
 
-- [ ] G3.1 README: setup, seed, run, test, deploy, demo, env vars
-- [ ] G3.2 Architecture diagrams linked; API summary; "new dev in 5 min" path
-- [ ] G3.3 Keep `docs/AI_USAGE.md` prompt log updated as we build
+- [x] G3.1 README: setup, seed, run, test, deploy, demo, env vars
+- [x] G3.2 Architecture diagrams linked; API summary; "new dev in 5 min" path
+- [x] G3.3 Keep `docs/AI_USAGE.md` prompt log updated as we build
       **Accept:** a new dev can clone → seed → run from README alone.
 
 ---

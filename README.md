@@ -2,6 +2,29 @@
 
 HR salary management system for ACME Corp — employee directory, compensation analytics, and history tracking.
 
+## 🚀 Quick Start (5-minute path)
+
+```bash
+# 1. Clone and install all dependencies
+npm install && cd apps/web && npm install && cd ../..
+cd apps/api && uv sync && cd ../..
+
+# 2. Setup environment
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env.local
+
+# 3. Seed the database (10,000 records)
+npm run seed
+
+# 4. Run the app
+npm run dev
+```
+
+- **Web**: [http://localhost:3000](http://localhost:3000) (Login: `admin@acme.com` / `admin123`)
+- **API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+---
+
 ## Project Structure
 
 This is a monorepo containing:
@@ -16,61 +39,31 @@ This is a monorepo containing:
 - **Frontend**: Next.js (App Router), Tailwind CSS, Shadcn UI, TanStack Query.
 - **Database**: SQLite (Development/Testing), PostgreSQL (Production).
 
-## Getting Started
+## Environment Variables
 
-### Prerequisites
+### Backend (`apps/api/.env`)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | SQLAlchemy connection string | `sqlite+aiosqlite:///./salary.db` |
+| `SECRET_KEY` | JWT signing key | `change-me-in-production` |
+| `CORS_ORIGINS` | Allowed frontend origins | `http://localhost:3000` |
 
-- **Node.js**: v20+ and `npm`
-- **Python**: v3.12+
-- **uv**: Recommended for Python dependency management (`pip install uv`)
+### Frontend (`apps/web/.env.local`)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_API_URL` | Backend API base URL | `http://localhost:8000` |
 
-### 1. Environment Setup
+## API Summary
 
-Copy the example environment files and adjust if necessary:
-
-```bash
-# Backend
-cp apps/api/.env.example apps/api/.env
-
-# Frontend
-cp apps/web/.env.example apps/web/.env.local
-```
-
-### 2. Installation
-
-Install dependencies for the entire project:
-
-```bash
-# Install root dev dependencies (concurrently)
-npm install
-
-# Install web dependencies
-cd apps/web && npm install && cd ../..
-
-# API dependencies are handled by uv automatically during scripts,
-# but you can sync them manually:
-cd apps/api && uv sync && cd ../..
-```
-
-### 3. Running the App
-
-Run both API and Web in development mode:
-
-```bash
-npm run dev
-```
-
-- **API**: [http://localhost:8000/docs](http://localhost:8000/docs) (Swagger UI)
-- **Web**: [http://localhost:3000](http://localhost:3000)
-
-### 4. Database & Seeding
-
-The project includes a seed script to generate 10,000 realistic employee records for testing performance and analytics.
-
-```bash
-# Run the seed script
-npm run seed
-```
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/auth/login` | `POST` | Authenticate and get JWT |
+| `/employees/` | `GET` | Paginated list with filters/search |
+| `/employees/{id}` | `GET` | Detailed employee view |
+| `/employees/{id}/compensation` | `PATCH` | Update salary (creates history) |
+| `/analytics/summary` | `GET` | Global KPIs (Avg, Median, etc.) |
+| `/analytics/breakdown` | `GET` | Grouped stats by country/dept/level |
+| `/export/employees.csv` | `GET` | Export filtered list to CSV |
 
 ## Performance
 
@@ -84,31 +77,34 @@ The system is designed to handle 10,000+ employee records with sub-300ms respons
 | `/analytics/summary` | ~55 ms | ~106 ms |
 | `/employees/?q=John` | ~47 ms | ~55 ms |
 
-For detailed performance strategy and triggers for scaling, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
+For detailed performance strategy, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 
 ## Development Workflow
 
 ### Testing
-
 We follow a TDD-first approach. Run all tests:
-
 ```bash
 npm test
 ```
 
-Or run them individually:
-- `npm run test:api`
-- `npm run test:web`
-
 ### Linting & Formatting
-
 ```bash
 npm run lint    # Check for linting errors
 npm run format  # Auto-format code
 ```
 
+## Deployment
+
+### Frontend (Vercel)
+The frontend is a standard Next.js app. Point Vercel to the `apps/web` directory and set `NEXT_PUBLIC_API_URL`.
+
+### Backend (Docker/Render/Fly)
+The backend can be containerized using the provided `Dockerfile` (to be added) or deployed directly to a Python-capable host. Ensure `DATABASE_URL` points to a persistent PostgreSQL instance in production.
+
 ## Documentation
 
-See the `docs/` folder for:
-- `DESIGN_NOTES.md`: Data model, API contract, and validation rules.
-- `TASK_BACKLOG.md`: Current progress and upcoming stories.
+- [Architecture & Diagrams](docs/ARCHITECTURE.md)
+- [Product Requirements (PRD)](docs/PRD.md)
+- [Design Notes & API Contract](docs/DESIGN_NOTES.md)
+- [AI Usage & Prompt Log](docs/AI_USAGE.md)
+- [Task Backlog](TASK_BACKLOG.md)
