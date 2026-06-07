@@ -49,7 +49,7 @@ export function EmployeeCreateForm({ onClose, onSuccess }: EmployeeCreateFormPro
     setFormData(prev => ({
       ...prev,
       [name]: name === 'department_id' || name === 'base_annual' || name === 'bonus_annual' 
-        ? parseInt(value) || 0 
+        ? (value === "" ? 0 : parseInt(value) || 0) 
         : value
     }));
   };
@@ -230,8 +230,9 @@ export function EmployeeCreateForm({ onClose, onSuccess }: EmployeeCreateFormPro
                     <input
                       type="number"
                       name="base_annual"
-                      value={formData.base_annual}
+                      value={formData.base_annual === 0 ? "" : formData.base_annual}
                       onChange={handleChange}
+                      onFocus={(e) => e.target.select()}
                       required
                       min="1"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pl-12"
@@ -245,8 +246,9 @@ export function EmployeeCreateForm({ onClose, onSuccess }: EmployeeCreateFormPro
                     <input
                       type="number"
                       name="bonus_annual"
-                      value={formData.bonus_annual}
+                      value={formData.bonus_annual === 0 ? "" : formData.bonus_annual}
                       onChange={handleChange}
+                      onFocus={(e) => e.target.select()}
                       required
                       min="0"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

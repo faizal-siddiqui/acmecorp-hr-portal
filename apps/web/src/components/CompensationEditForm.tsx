@@ -26,7 +26,9 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'base_annual' || name === 'bonus_annual' ? parseInt(value) || 0 : value
+      [name]: name === 'base_annual' || name === 'bonus_annual' 
+        ? (value === "" ? 0 : parseInt(value) || 0) 
+        : value
     }));
   };
 
@@ -95,8 +97,9 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
                     id="base_annual"
                     type="number"
                     name="base_annual"
-                    value={formData.base_annual}
+                    value={formData.base_annual === 0 ? "" : formData.base_annual}
                     onChange={handleChange}
+                    onFocus={(e) => e.target.select()}
                     required
                     min="1"
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-12"
@@ -119,8 +122,9 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
                     id="bonus_annual"
                     type="number"
                     name="bonus_annual"
-                    value={formData.bonus_annual}
+                    value={formData.bonus_annual === 0 ? "" : formData.bonus_annual}
                     onChange={handleChange}
+                    onFocus={(e) => e.target.select()}
                     required
                     min="0"
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-12"
