@@ -24,7 +24,8 @@
 
     "typecheck": "npm run typecheck --prefix apps/web",
 
-    "seed": "uv run --directory apps/api python -m scripts.seed"
+    "seed": "uv run --directory apps/api python -m scripts.seed",
+    "benchmark": "uv run --directory apps/api python -m scripts.benchmark"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

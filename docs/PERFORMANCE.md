@@ -48,6 +48,17 @@ feels immediate (skeletons/optimistic updates mask any latency).
 ## 4. How we'll verify (not just claim)
 - A small **benchmark note**: time the `/employees` list and `/analytics/summary`
   endpoints against the seeded 10k DB and record numbers in the README.
+
+### Baseline Benchmarks (June 2026)
+Tested on 10,000 employees using `apps/api/scripts/benchmark.py` (SQLite, local).
+
+| Scenario | Avg (ms) | P95 (ms) | P99 (ms) |
+|----------|----------|----------|----------|
+| **Employee Directory** (Page 1) | 25.76 | 28.21 | 85.25 |
+| **Global Analytics Summary** | 55.39 | 105.56 | 118.47 |
+| **Search** (`q=John`) | 46.78 | 55.18 | 58.32 |
+| **Filtered Analytics** (`country=US`) | 14.95 | 17.10 | 19.14 |
+
 - Assert **correctness** of aggregates against the deterministic 20-row fixture in tests.
 - Keep the **test suite fast** (< ~30 s): SQLite in-memory for unit tests, minimal
   fixtures, no network.

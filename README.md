@@ -72,6 +72,20 @@ The project includes a seed script to generate 10,000 realistic employee records
 npm run seed
 ```
 
+## Performance
+
+The system is designed to handle 10,000+ employee records with sub-300ms response times for all critical paths.
+
+### Benchmark Results (10k employees)
+
+| Endpoint | Avg Latency | P95 Latency |
+|----------|-------------|-------------|
+| `/employees/` (List) | ~26 ms | ~28 ms |
+| `/analytics/summary` | ~55 ms | ~106 ms |
+| `/employees/?q=John` | ~47 ms | ~55 ms |
+
+For detailed performance strategy and triggers for scaling, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
+
 ## Development Workflow
 
 ### Testing

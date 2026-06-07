@@ -161,8 +161,8 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ### Story G2 — Performance verification
 
-- [ ] G2.1 Benchmark `/employees` & `/analytics/summary` on 10k; record in README
-- [ ] G2.2 Add/adjust indexes if P95 > budget
+- [x] G2.1 Benchmark `/employees` & `/analytics/summary` on 10k; record in README
+- [x] G2.2 Add/adjust indexes if P95 > budget
       **Accept:** documented numbers meet the < 300 ms budget (or trigger noted in PERFORMANCE.md).
 
 ### Story G3 — Documentation & DX
