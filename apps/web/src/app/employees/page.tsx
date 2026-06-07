@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { apiFetch, getEmployees, Employee } from "@/lib/api";
-import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter, ExternalLink, UserPlus } from "lucide-react";
+import { getEmployees, Employee, exportEmployees } from "@/lib/api";
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter, ExternalLink, UserPlus, Download } from "lucide-react";
 import Link from "next/link";
 import { EmployeeCreateForm } from "@/components/EmployeeCreateForm";
 import { AnalyticsKPIs } from "@/components/AnalyticsKPIs";
@@ -45,6 +45,7 @@ function EmployeesPageContent() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   // State from URL
@@ -116,12 +117,6 @@ function EmployeesPageContent() {
     };
   }, [page, pageSize, q, country, department, level, status, sortBy, sortOrder]);
 
-  const refreshEmployees = () => {
-    // Trigger a re-fetch by updating the page or just re-running the fetch logic
-    // For simplicity, we can just push to the same URL to trigger the useEffect
-    router.refresh();
-  };
-
   // Debounced search
   const [searchInput, setSearchInput] = useState(q);
   const [prevQ, setPrevQ] = useState(q);
@@ -156,6 +151,37 @@ function EmployeesPageContent() {
     }
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const params = new URLSearchParams({
+        ...(q && { q }),
+        ...(country && { country }),
+        ...(department && { department }),
+        ...(level && { level }),
+        ...(status && { status }),
+        ...(sortBy && { sort_by: sortBy }),
+        ...(sortOrder && { sort_order: sortOrder }),
+      });
+
+      const response = await exportEmployees(params);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `employees_export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Failed to export employees:", error);
+      alert("Failed to export employees. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
@@ -164,6 +190,10 @@ function EmployeesPageContent() {
           <p className="text-muted-foreground mt-1">Manage and view all employees across the organization.</p>
         </div>
         <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={handleExport} disabled={exporting}>
+            <Download className="h-4 w-4 mr-2" />
+            {exporting ? "Exporting..." : "Export CSV"}
+          </Button>
           <Button onClick={() => setIsAddModalOpen(true)}>
             <UserPlus className="h-4 w-4 mr-2" />
             Add Employee

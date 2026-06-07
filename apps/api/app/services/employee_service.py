@@ -1,3 +1,5 @@
+import csv
+import io
 from datetime import timezone
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -211,3 +213,54 @@ class EmployeeService:
 
     async def get_departments(self):
         return await self.repository.get_departments()
+
+    async def get_employees_csv(
+        self,
+        q: Optional[str] = None,
+        country: Optional[str] = None,
+        department: Optional[str] = None,
+        level: Optional[str] = None,
+        status: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        sort_order: str = "asc"
+    ) -> str:
+        items, _ = await self.repository.get_employees(
+            page=None,
+            page_size=None,
+            q=q,
+            country=country,
+            department=department,
+            level=level,
+            status=status,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Headers
+        writer.writerow([
+            "Employee Code", "First Name", "Last Name", "Email", 
+            "Country", "Department", "Level", "Status", 
+            "Hire Date", "Base Annual", "Currency", "Base USD"
+        ])
+        
+        # Rows
+        for item in items:
+            writer.writerow([
+                item.employee_code,
+                item.first_name,
+                item.last_name,
+                item.email,
+                item.country,
+                item.department_name,
+                item.level,
+                item.status,
+                item.hire_date.isoformat(),
+                item.base_annual,
+                item.currency,
+                round(item.base_usd, 2)
+            ])
+            
+        return output.getvalue()

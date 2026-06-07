@@ -10,8 +10,8 @@ class EmployeeRepository:
 
     async def get_employees(
         self,
-        page: int,
-        page_size: int,
+        page: Optional[int],
+        page_size: Optional[int],
         q: Optional[str] = None,
         country: Optional[str] = None,
         department: Optional[str] = None,
@@ -20,8 +20,6 @@ class EmployeeRepository:
         sort_by: Optional[str] = None,
         sort_order: str = "asc"
     ):
-        offset = (page - 1) * page_size
-        
         # Base selection
         stmt = select(
             Employee.id,
@@ -87,8 +85,10 @@ class EmployeeRepository:
         # Count query (before limit/offset)
         count_stmt = select(func.count()).select_from(stmt.subquery())
         
-        # Apply pagination
-        stmt = stmt.offset(offset).limit(page_size)
+        # Apply pagination if provided
+        if page is not None and page_size is not None:
+            offset = (page - 1) * page_size
+            stmt = stmt.offset(offset).limit(page_size)
         
         result = await self.db.execute(stmt)
         items = result.all()

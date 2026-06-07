@@ -142,9 +142,9 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ### Story F1 — CSV export of filtered view
 
-- [ ] F1.1 _(test)_ CSV reflects active filters; correct headers/rows
-- [ ] F1.2 `GET /export/employees.csv`
-- [ ] F1.3 Web "Export CSV" button on directory
+- [x] F1.1 _(test)_ CSV reflects active filters; correct headers/rows
+- [x] F1.2 `GET /export/employees.csv`
+- [x] F1.3 Web "Export CSV" button on directory
       **Accept:** downloaded CSV matches on-screen filtered data.
 
 ---

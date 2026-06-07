@@ -178,3 +178,9 @@ export async function getAnalyticsBreakdown(params: URLSearchParams): Promise<An
   if (!response.ok) throw new Error("Failed to fetch analytics breakdown");
   return response.json();
 }
+
+export async function exportEmployees(params: URLSearchParams) {
+  const response = await apiFetch(`/export/employees.csv?${params.toString()}`);
+  if (!response.ok) throw new Error("Failed to export employees");
+  return response;
+}
