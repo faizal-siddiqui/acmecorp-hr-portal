@@ -81,7 +81,10 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <label 
+                  htmlFor="base_annual"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   Base Annual Salary
                 </label>
                 <div className="relative">
@@ -89,6 +92,7 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
                     {formData.currency}
                   </span>
                   <input
+                    id="base_annual"
                     type="number"
                     name="base_annual"
                     value={formData.base_annual}
@@ -101,7 +105,10 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <label 
+                  htmlFor="bonus_annual"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   Bonus Annual
                 </label>
                 <div className="relative">
@@ -109,6 +116,7 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
                     {formData.currency}
                   </span>
                   <input
+                    id="bonus_annual"
                     type="number"
                     name="bonus_annual"
                     value={formData.bonus_annual}
@@ -122,10 +130,14 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  <label 
+                    htmlFor="currency"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
                     Currency
                   </label>
                   <select
+                    id="currency"
                     name="currency"
                     value={formData.currency}
                     onChange={handleChange}
@@ -142,10 +154,14 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  <label 
+                    htmlFor="effective_date"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
                     Effective Date
                   </label>
                   <input
+                    id="effective_date"
                     type="date"
                     name="effective_date"
                     value={formData.effective_date}

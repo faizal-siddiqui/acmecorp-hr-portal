@@ -153,10 +153,10 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ### Story G1 — Test strategy execution
 
-- [ ] G1.1 Unit: validation, FX math, median/avg, history creation (mocked repos)
-- [ ] G1.2 Integration: list/filter, edit→history, analytics correctness, auth guards
-- [ ] G1.3 UI: directory render/filter, edit-form validation, dashboard KPIs
-- [ ] G1.4 Ensure suite is fast (<~30s) & deterministic; coverage on core
+- [x] G1.1 Unit: validation, FX math, median/avg, history creation (mocked repos)
+- [x] G1.2 Integration: list/filter, edit→history, analytics correctness, auth guards
+- [x] G1.3 UI: directory render/filter, edit-form validation, dashboard KPIs
+- [x] G1.4 Ensure suite is fast (<~30s) & deterministic; coverage on core
       **Accept:** all green in CI; aggregates asserted on fixture; no flaky/network tests.
 
 ### Story G2 — Performance verification
