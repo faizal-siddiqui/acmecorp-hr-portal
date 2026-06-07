@@ -5,7 +5,7 @@
   "description": "HR salary management — monorepo root scripts",
   "scripts": {
     "dev": "concurrently --names API,WEB --prefix-colors cyan,magenta \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:api": "uv run --directory apps/api uvicorn app.main:app --reload --port 8000",
+    "dev:api": "uv run --directory apps/api uvicorn app.main:app --reload --port 8000 --no-server-header",
     "dev:web": "npm run dev --prefix apps/web",
 
     "build": "npm run build --prefix apps/web",
