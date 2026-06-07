@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
-from ..services.employee_service import EmployeeService
+from ..services import EmployeeService
 from ..dependencies import get_current_user
 
 router = APIRouter(

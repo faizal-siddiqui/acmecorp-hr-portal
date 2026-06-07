@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from datetime import date
-from app.services.employee_service import EmployeeService
+from app.services import EmployeeService
 from app.models import Compensation, FxRate, Employee, SalaryChangeHistory
 from app.schemas import CompensationUpdate
 

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from datetime import date
-from app.repositories.analytics_repository import AnalyticsRepository
+from app.repositories import AnalyticsRepository
 
 @pytest.mark.asyncio
 async def test_get_summary_data_logic():

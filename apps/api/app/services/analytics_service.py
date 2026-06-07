@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..repositories.analytics_repository import AnalyticsRepository
+from ..repositories import AnalyticsRepository
 from ..schemas import AnalyticsSummary, AnalyticsBreakdown, AnalyticsBreakdownItem
 
 class AnalyticsService:

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
-from ..services.analytics_service import AnalyticsService
+from ..services import AnalyticsService
 from ..schemas import AnalyticsSummary, AnalyticsBreakdown
 from ..dependencies import get_current_user
 

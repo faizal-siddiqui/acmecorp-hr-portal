@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.services.employee_service import EmployeeService
+from app.services import EmployeeService
 from app.models import Employee, Department, Compensation, FxRate, User, SalaryChangeHistory
 from app.schemas import CompensationUpdate
 from datetime import date, datetime

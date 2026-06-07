@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
-from ..services.employee_service import EmployeeService
+from ..services import EmployeeService
 from ..schemas import (
     PaginatedEmployees, 
     EmployeeDetail, 

@@ -3,7 +3,7 @@ import io
 from datetime import timezone
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..repositories.employee_repository import EmployeeRepository
+from ..repositories import EmployeeRepository
 from ..schemas import (
     PaginatedEmployees, 
     EmployeeListItem, 

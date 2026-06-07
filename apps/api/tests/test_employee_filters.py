@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.repositories.employee_repository import EmployeeRepository
+from app.repositories import EmployeeRepository
 from app.models import Employee, Department, Compensation, FxRate
 from datetime import date
 
