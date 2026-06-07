@@ -111,9 +111,9 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 
 ### Story D4 — Create & deactivate employee
 
-- [ ] D4.1 _(test)_ create employee + initial compensation; unique email/code
-- [ ] D4.2 _(test)_ soft-delete sets status=inactive (not hard delete)
-- [ ] D4.3 Web add-employee form + deactivate action
+- [x] D4.1 _(test)_ create employee + initial compensation; unique email/code
+- [x] D4.2 _(test)_ soft-delete sets status=inactive (not hard delete)
+- [x] D4.3 Web add-employee form + deactivate action
       **Accept:** new employee appears in list; deactivated excluded by default filter.
 
 ---

@@ -3,8 +3,9 @@
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { apiFetch, getEmployees, Employee } from "@/lib/api";
-import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter, ExternalLink } from "lucide-react";
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter, ExternalLink, UserPlus } from "lucide-react";
 import Link from "next/link";
+import { EmployeeCreateForm } from "@/components/EmployeeCreateForm";
 import {
   Table,
   TableBody,
@@ -42,6 +43,7 @@ function EmployeesPageContent() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   // State from URL
   const page = parseInt(searchParams.get("page") || "1");
@@ -112,6 +114,12 @@ function EmployeesPageContent() {
     };
   }, [page, pageSize, q, country, department, level, status, sortBy, sortOrder]);
 
+  const refreshEmployees = () => {
+    // Trigger a re-fetch by updating the page or just re-running the fetch logic
+    // For simplicity, we can just push to the same URL to trigger the useEffect
+    router.refresh();
+  };
+
   // Debounced search
   const [searchInput, setSearchInput] = useState(q);
   const [prevQ, setPrevQ] = useState(q);
@@ -153,8 +161,14 @@ function EmployeesPageContent() {
           <h1 className="text-3xl font-bold">Employee Directory</h1>
           <p className="text-muted-foreground mt-1">Manage and view all employees across the organization.</p>
         </div>
-        <div className="text-sm bg-muted px-3 py-1 rounded-full font-medium">
-          Total: {total}
+        <div className="flex items-center gap-4">
+          <Button onClick={() => setIsAddModalOpen(true)}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add Employee
+          </Button>
+          <div className="text-sm bg-muted px-3 py-1 rounded-full font-medium">
+            Total: {total}
+          </div>
         </div>
       </div>
 
@@ -358,6 +372,16 @@ function EmployeesPageContent() {
             </PaginationContent>
           </Pagination>
         </div>
+      )}
+
+      {isAddModalOpen && (
+        <EmployeeCreateForm 
+          onClose={() => setIsAddModalOpen(false)}
+          onSuccess={() => {
+            // Re-fetch or update list
+            router.refresh();
+          }}
+        />
       )}
     </div>
   );

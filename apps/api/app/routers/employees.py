@@ -4,7 +4,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
 from ..services.employee_service import EmployeeService
-from ..schemas import PaginatedEmployees, EmployeeDetail, CompensationUpdate, SalaryHistoryItem
+from ..schemas import (
+    PaginatedEmployees, 
+    EmployeeDetail, 
+    CompensationUpdate, 
+    SalaryHistoryItem,
+    EmployeeCreate,
+    EmployeeStatusUpdate,
+    Department as DepartmentSchema
+)
 from ..dependencies import get_current_user
 from ..models import User
 
@@ -63,3 +71,34 @@ async def get_employee_history(
 ):
     service = EmployeeService(db)
     return await service.get_employee_salary_history(employee_id)
+
+@router.post("/", response_model=EmployeeDetail)
+async def create_employee(
+    data: EmployeeCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    service = EmployeeService(db)
+    try:
+        employee = await service.create_employee(data)
+        # Return detail view
+        return await service.get_employee_detail(employee.id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.patch("/{employee_id}/status")
+async def update_employee_status(
+    employee_id: int,
+    data: EmployeeStatusUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    service = EmployeeService(db)
+    await service.deactivate_employee(employee_id) if data.status == "inactive" else None
+    # For now we only support deactivation via this story, but could expand
+    return {"status": data.status}
+
+@router.get("/meta/departments", response_model=List[DepartmentSchema])
+async def get_departments(
+    db: AsyncSession = Depends(get_db)
+):
+    service = EmployeeService(db)
+    return await service.get_departments()

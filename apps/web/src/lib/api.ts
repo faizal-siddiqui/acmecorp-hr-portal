@@ -95,3 +95,52 @@ export async function getEmployeeHistory(id: string): Promise<SalaryHistoryItem[
   if (!response.ok) throw new Error("Failed to fetch employee history");
   return response.json();
 }
+
+export interface EmployeeCreate {
+  employee_code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  country: string;
+  level: string;
+  hire_date: string;
+  department_id: number;
+  base_annual: number;
+  bonus_annual: number;
+  currency: string;
+}
+
+export async function createEmployee(data: EmployeeCreate): Promise<EmployeeDetail> {
+  const response = await apiFetch("/employees/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to create employee");
+  }
+  return response.json();
+}
+
+export async function updateEmployeeStatus(id: number, status: "active" | "inactive") {
+  const response = await apiFetch(`/employees/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to update employee status");
+  }
+  return response.json();
+}
+
+export interface Department {
+  id: number;
+  name: string;
+}
+
+export async function getDepartments(): Promise<Department[]> {
+  const response = await apiFetch("/employees/meta/departments");
+  if (!response.ok) throw new Error("Failed to fetch departments");
+  return response.json();
+}

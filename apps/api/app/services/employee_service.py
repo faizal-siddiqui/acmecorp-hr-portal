@@ -2,8 +2,15 @@ from datetime import timezone
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..repositories.employee_repository import EmployeeRepository
-from ..schemas import PaginatedEmployees, EmployeeListItem, EmployeeDetail, CompensationUpdate, SalaryHistoryItem
-from ..models import Compensation, SalaryChangeHistory, User
+from ..schemas import (
+    PaginatedEmployees, 
+    EmployeeListItem, 
+    EmployeeDetail, 
+    CompensationUpdate, 
+    SalaryHistoryItem,
+    EmployeeCreate
+)
+from ..models import Compensation, SalaryChangeHistory, Employee
 
 class EmployeeService:
     def __init__(self, db: AsyncSession):
@@ -17,7 +24,7 @@ class EmployeeService:
         country: Optional[str] = None,
         department: Optional[str] = None,
         level: Optional[str] = None,
-        status: Optional[str] = None,
+        status: Optional[str] = "active",
         sort_by: Optional[str] = None,
         sort_order: str = "asc"
     ) -> PaginatedEmployees:
@@ -162,3 +169,45 @@ class EmployeeService:
             )
             for h in history
         ]
+
+    async def create_employee(self, data: EmployeeCreate) -> Employee:
+        # Check if currency exists
+        fx_rate = await self.repository.get_fx_rate(data.currency)
+        if not fx_rate:
+            raise ValueError(f"Currency {data.currency} not found")
+
+        # Create employee and initial compensation in a transaction
+        async with self.repository.db.begin_nested():
+            employee = Employee(
+                employee_code=data.employee_code,
+                first_name=data.first_name,
+                last_name=data.last_name,
+                email=data.email,
+                country=data.country,
+                level=data.level,
+                hire_date=data.hire_date,
+                department_id=data.department_id,
+                status="active"
+            )
+            await self.repository.create_employee(employee)
+            await self.repository.db.flush() # Get employee ID
+
+            compensation = Compensation(
+                employee_id=employee.id,
+                base_annual=data.base_annual,
+                bonus_annual=data.bonus_annual,
+                currency=data.currency,
+                effective_date=data.hire_date,
+                is_current=True
+            )
+            await self.repository.add_compensation(compensation)
+        
+        await self.repository.db.commit()
+        return employee
+
+    async def deactivate_employee(self, employee_id: int):
+        await self.repository.update_employee_status(employee_id, "inactive")
+        await self.repository.db.commit()
+
+    async def get_departments(self):
+        return await self.repository.get_departments()

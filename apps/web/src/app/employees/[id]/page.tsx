@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { getEmployee, EmployeeDetail } from "@/lib/api";
+import { getEmployee, EmployeeDetail, updateEmployeeStatus } from "@/lib/api";
 import { 
   ArrowLeft, 
   Mail, 
@@ -15,7 +15,9 @@ import {
   Clock,
   ShieldCheck,
   Edit,
-  History
+  History,
+  UserX,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,6 +36,7 @@ export default function EmployeeDetailPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [refreshHistory, setRefreshHistory] = useState(0);
+  const [deactivating, setDeactivating] = useState(false);
 
   const fetchEmployee = async () => {
     try {
@@ -50,6 +53,22 @@ export default function EmployeeDetailPage({ params }: PageProps) {
   useEffect(() => {
     fetchEmployee();
   }, [resolvedParams.id]);
+
+  const handleDeactivate = async () => {
+    if (!employee || !confirm(`Are you sure you want to deactivate ${employee.first_name} ${employee.last_name}?`)) {
+      return;
+    }
+
+    setDeactivating(true);
+    try {
+      await updateEmployeeStatus(employee.id, "inactive");
+      await fetchEmployee();
+    } catch (err: any) {
+      alert(err.message || "Failed to deactivate employee");
+    } finally {
+      setDeactivating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -244,8 +263,18 @@ export default function EmployeeDetailPage({ params }: PageProps) {
                 <Edit className="h-4 w-4 mr-2" />
                 Update Compensation
               </Button>
-              <Button className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" variant="ghost" disabled>
-                Deactivate Employee
+              <Button 
+                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" 
+                variant="ghost" 
+                onClick={handleDeactivate}
+                disabled={deactivating || employee.status === 'inactive'}
+              >
+                {deactivating ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <UserX className="h-4 w-4 mr-2" />
+                )}
+                {employee.status === 'inactive' ? 'Already Inactive' : 'Deactivate Employee'}
               </Button>
             </div>
           </div>

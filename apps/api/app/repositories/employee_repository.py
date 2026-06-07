@@ -155,3 +155,16 @@ class EmployeeRepository:
         
         result = await self.db.execute(stmt)
         return result.scalars().all()
+
+    async def create_employee(self, employee: Employee) -> Employee:
+        self.db.add(employee)
+        return employee
+
+    async def update_employee_status(self, employee_id: int, status: str):
+        stmt = update(Employee).where(Employee.id == employee_id).values(status=status)
+        await self.db.execute(stmt)
+
+    async def get_departments(self) -> List[Department]:
+        stmt = select(Department).order_by(Department.name)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
