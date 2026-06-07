@@ -1,14 +1,19 @@
 import asyncio
 import random
+import sys
 from datetime import date
 from typing import List, Dict, Optional
 
 from sqlalchemy import select, insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from passlib.context import CryptContext
+
 from app.database import AsyncSessionLocal, engine
 from app.models import Employee, Department, Compensation, User, FxRate
 from scripts.generators import DataGenerator, COUNTRIES, DEPARTMENTS, LEVELS
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 async def clear_database(session: AsyncSession):
@@ -18,6 +23,53 @@ async def clear_database(session: AsyncSession):
     await session.execute(delete(Compensation))
     await session.execute(delete(Employee))
     await session.execute(delete(Department))
+    await session.execute(delete(FxRate))
+    await session.execute(delete(User))
+    await session.commit()
+
+
+async def seed_fx_rates(session: AsyncSession):
+    """Seeds FX rates for all currencies in COUNTRIES."""
+    print("Seeding FX rates...")
+    # Rates relative to 1 USD as of 2026-06-05
+    rates = {
+        "USD": 1.0,
+        "GBP": 1.33,    # 1 GBP = 1.33 USD
+        "EUR": 1.15,    # 1 EUR = 1.15 USD
+        "INR": 0.0105,  # 1 INR = 0.0105 USD (or ~95 INR per 1 USD)
+        "CAD": 0.72,    # 1 CAD = 0.72 USD
+        "AUD": 0.66,    # 1 AUD = 0.66 USD
+        "SGD": 0.74,    # 1 SGD = 0.74 USD
+        "BRL": 0.17,    # 1 BRL = 0.17 USD
+        "JPY": 0.0062,  # 1 JPY = 0.0062 USD
+    }
+    
+    fx_rates = []
+    for currency, rate in rates.items():
+        fx_rates.append({
+            "currency": currency,
+            "rate_to_usd": rate,
+            "as_of": date(2026, 6, 5)
+        })
+    
+    await session.execute(insert(FxRate), fx_rates)
+    await session.commit()
+
+
+async def seed_hr_user(session: AsyncSession):
+    """Seeds one HR manager user."""
+    print("Seeding HR user...")
+    # Using a simple hash if bcrypt is being problematic in this environment
+    # but ideally we want to match what the app uses.
+    # For now, let's try to use pbkdf2_sha256 which is more stable across environments.
+    hr_pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+    hashed_password = hr_pwd_context.hash("admin123")
+    user = User(
+        email="maya@example.com",
+        password_hash=hashed_password,
+        role="hr_manager"
+    )
+    session.add(user)
     await session.commit()
 
 
@@ -37,10 +89,10 @@ async def seed_departments(session: AsyncSession) -> Dict[str, int]:
     return dept_map
 
 
-async def seed_employees(session: AsyncSession, dept_map: Dict[str, int], num_employees: int = 10000):
+async def seed_employees(session: AsyncSession, dept_map: Dict[str, int], num_employees: int = 10000, seed: int = 42):
     """Seeds employees with hierarchy and compensation."""
-    print(f"Generating {num_employees} employees...")
-    gen = DataGenerator(seed=42)
+    print(f"Generating {num_employees} employees (seed={seed})...")
+    gen = DataGenerator(seed=seed)
     
     # 1. Generate all employee data in memory first to build hierarchy
     all_emps_data = []
@@ -142,7 +194,43 @@ async def seed_employees(session: AsyncSession, dept_map: Dict[str, int], num_em
         await session.commit()
 
 
+async def verify_seed(session: AsyncSession):
+    """Verifies counts and prints distribution."""
+    print("\nVerifying seed data...")
+    
+    emp_count = (await session.execute(select(Employee))).scalars().all()
+    comp_count = (await session.execute(select(Compensation))).scalars().all()
+    dept_count = (await session.execute(select(Department))).scalars().all()
+    fx_count = (await session.execute(select(FxRate))).scalars().all()
+    user_count = (await session.execute(select(User))).scalars().all()
+    
+    print(f"  Employees: {len(emp_count)}")
+    print(f"  Compensations: {len(comp_count)}")
+    print(f"  Departments: {len(dept_count)}")
+    print(f"  FX Rates: {len(fx_count)}")
+    print(f"  Users: {len(user_count)}")
+    
+    # Spot check distribution
+    print("\nLevel distribution:")
+    for level in LEVELS:
+        count = await session.execute(select(Employee).where(Employee.level == level))
+        print(f"  {level}: {len(count.scalars().all())}")
+
+    print("\nCountry distribution:")
+    for country in COUNTRIES:
+        count = await session.execute(select(Employee).where(Employee.country == country["code"]))
+        print(f"  {country['code']}: {len(count.scalars().all())}")
+
+
 async def main():
+    num_employees = 10000
+    seed_val = 42
+    
+    if "--fixture" in sys.argv:
+        num_employees = 20
+        seed_val = 123 # Different seed for fixture
+        print("Running in FIXTURE mode (20 employees)...")
+
     async with engine.begin() as conn:
         # Optional: ensure tables exist if not using migrations
         # await conn.run_sync(Base.metadata.create_all)
@@ -150,11 +238,14 @@ async def main():
 
     async with AsyncSessionLocal() as session:
         await clear_database(session)
+        await seed_fx_rates(session)
+        await seed_hr_user(session)
         dept_map = await seed_departments(session)
-        await seed_employees(session, dept_map, num_employees=10000)
+        await seed_employees(session, dept_map, num_employees=num_employees, seed=seed_val)
+        await verify_seed(session)
         await session.commit()
     
-    print("Seeding completed successfully!")
+    print("\nSeeding completed successfully!")
 
 
 if __name__ == "__main__":
