@@ -20,8 +20,8 @@ export function CompensationHistory({ employeeId, refreshTrigger }: Compensation
         setLoading(true);
         const data = await getEmployeeHistory(employeeId);
         setHistory(data);
-      } catch (err: any) {
-        setError(err.message || "Failed to load history");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Failed to load history");
       } finally {
         setLoading(false);
       }
@@ -79,7 +79,7 @@ export function CompensationHistory({ employeeId, refreshTrigger }: Compensation
       <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-border" />
 
       <div className="space-y-6">
-        {history.map((item, index) => (
+        {history.map((item) => (
           <div key={item.id} className="relative pl-12">
             {/* Dot */}
             <div className="absolute left-0 top-1.5 h-10 w-10 rounded-full bg-background border-2 border-primary flex items-center justify-center z-10 shadow-sm">
@@ -93,7 +93,7 @@ export function CompensationHistory({ employeeId, refreshTrigger }: Compensation
                 </span>
                 <div className="flex items-center text-xs text-muted-foreground">
                   <Calendar className="h-3 w-3 mr-1" />
-                  {new Date(item.changed_at).toLocaleDateString(undefined, { 
+                  {new Date(item.changed_at).toLocaleString(undefined, { 
                     dateStyle: 'medium',
                     timeStyle: 'short'
                   })}
@@ -117,7 +117,7 @@ export function CompensationHistory({ employeeId, refreshTrigger }: Compensation
               
               {item.note && (
                 <p className="mt-2 text-xs text-muted-foreground italic bg-muted/50 p-2 rounded">
-                  "{item.note}"
+                  &quot;{item.note}&quot;
                 </p>
               )}
             </div>

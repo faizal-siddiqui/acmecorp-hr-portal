@@ -285,7 +285,7 @@ function EmployeesPageContent() {
                     </span>
                   </TableCell>
                   <TableCell className="text-sm">
-                    {new Date(employee.hire_date).toLocaleDateString()}
+                    {new Date(employee.hire_date + 'T00:00:00').toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${

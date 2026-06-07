@@ -151,7 +151,7 @@ export default function EmployeeDetailPage({ params }: PageProps) {
                 </div>
                 <div className="flex items-center text-muted-foreground">
                   <Calendar className="h-5 w-5 mr-3 text-primary/60" />
-                  <span>Hired on {new Date(employee.hire_date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
+                  <span>Hired on {new Date(employee.hire_date + 'T00:00:00').toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
                 </div>
               </div>
             </div>

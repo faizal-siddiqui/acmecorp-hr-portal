@@ -16,7 +16,7 @@ export function CompensationEditForm({ employee, onClose, onSuccess }: Compensat
     base_annual: employee.base_annual,
     bonus_annual: employee.bonus_annual,
     currency: employee.currency,
-    effective_date: new Date().toISOString().split('T')[0],
+    effective_date: new Date().toLocaleDateString('en-CA'), // Returns YYYY-MM-DD in local time
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

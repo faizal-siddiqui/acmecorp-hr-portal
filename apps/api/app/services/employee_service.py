@@ -1,3 +1,4 @@
+from datetime import timezone
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..repositories.employee_repository import EmployeeRepository
@@ -148,11 +149,6 @@ class EmployeeService:
     async def get_employee_salary_history(self, employee_id: int) -> List[SalaryHistoryItem]:
         history = await self.repository.get_salary_history(employee_id)
         
-        # We need to join with User to get emails, or we can do it in the repository.
-        # Given the current models, SalaryChangeHistory has a relationship changed_by_user.
-        # But we need to make sure it's loaded.
-        
-        # Let's update the repository to join with User.
         return [
             SalaryHistoryItem(
                 id=h.id,
@@ -161,7 +157,7 @@ class EmployeeService:
                 old_value=h.old_value,
                 new_value=h.new_value,
                 changed_by_email=h.changed_by_user.email,
-                changed_at=h.changed_at,
+                changed_at=h.changed_at.replace(tzinfo=timezone.utc) if h.changed_at.tzinfo is None else h.changed_at,
                 note=h.note
             )
             for h in history

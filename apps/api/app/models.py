@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Optional, List
 
 from sqlalchemy import ForeignKey, Integer, String, Boolean, Date, DateTime, Float, Text
@@ -62,7 +62,9 @@ class SalaryChangeHistory(Base):
     old_value: Mapped[str] = mapped_column(Text, nullable=True)
     new_value: Mapped[str] = mapped_column(Text, nullable=False)
     changed_by: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
-    changed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    changed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
     note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     employee: Mapped["Employee"] = relationship(back_populates="salary_history")
