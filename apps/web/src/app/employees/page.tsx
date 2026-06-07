@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,6 +21,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 interface Employee {
   id: number;
@@ -29,32 +32,73 @@ interface Employee {
   country: string;
   level: string;
   status: string;
+  hire_date: string;
   department_name: string;
   base_annual: number;
   currency: string;
   base_usd: number;
 }
 
-interface PaginatedResponse {
-  items: Employee[];
-  total: number;
-  page: number;
-  page_size: number;
-}
+const COUNTRIES = ["US", "GB", "DE", "FR", "IN", "CA", "AU", "SG", "BR", "JP"];
+const DEPARTMENTS = ["Engineering", "Sales", "Marketing", "Finance", "HR", "Operations", "Support", "Product", "Legal", "Design"];
+const LEVELS = ["L1", "L2", "L3", "L4", "L5", "L6", "L7"];
+const STATUSES = ["active", "inactive"];
 
 export default function EmployeesPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  
+  // State from URL
+  const page = parseInt(searchParams.get("page") || "1");
+  const q = searchParams.get("q") || "";
+  const country = searchParams.get("country") || "";
+  const department = searchParams.get("department") || "";
+  const level = searchParams.get("level") || "";
+  const status = searchParams.get("status") || "";
+  const sortBy = searchParams.get("sort_by") || "";
+  const sortOrder = searchParams.get("sort_order") || "asc";
+
   const pageSize = 25;
 
-  const fetchEmployees = useCallback(async (currentPage: number) => {
+  const updateFilters = useCallback((updates: Record<string, string | number | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === "") {
+        params.delete(key);
+      } else {
+        params.set(key, value.toString());
+      }
+    });
+    // Reset to page 1 on filter change, unless we are explicitly setting the page
+    if (!updates.page) {
+      params.set("page", "1");
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  }, [router, pathname, searchParams]);
+
+  const fetchEmployees = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await apiFetch(`/employees/?page=${currentPage}&page_size=${pageSize}`);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        page_size: pageSize.toString(),
+        ...(q && { q }),
+        ...(country && { country }),
+        ...(department && { department }),
+        ...(level && { level }),
+        ...(status && { status }),
+        ...(sortBy && { sort_by: sortBy }),
+        ...(sortOrder && { sort_order: sortOrder }),
+      });
+
+      const response = await apiFetch(`/employees/?${params.toString()}`);
       if (response.ok) {
-        const data: PaginatedResponse = await response.json();
+        const data = await response.json();
         setEmployees(data.items);
         setTotal(data.total);
       }
@@ -63,80 +107,193 @@ export default function EmployeesPage() {
     } finally {
       setLoading(false);
     }
-  }, [pageSize]);
+  }, [page, pageSize, q, country, department, level, status, sortBy, sortOrder]);
 
   useEffect(() => {
-    fetchEmployees(page);
-  }, [page, fetchEmployees]);
+    fetchEmployees();
+  }, [fetchEmployees]);
+
+  // Debounced search
+  const [searchInput, setSearchInput] = useState(q);
+  useEffect(() => {
+    setSearchInput(q);
+  }, [q]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== q) {
+        updateFilters({ q: searchInput });
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput, q, updateFilters]);
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      updateFilters({ sort_order: sortOrder === "asc" ? "desc" : "asc" });
+    } else {
+      updateFilters({ sort_by: field, sort_order: "asc" });
+    }
+  };
+
+  const SortIcon = ({ field }: { field: string }) => {
+    if (sortBy !== field) return <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />;
+    return sortOrder === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />;
+  };
 
   const totalPages = Math.ceil(total / pageSize);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
+      updateFilters({ page: newPage });
     }
   };
 
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Employee Directory</h1>
-        <div className="text-sm text-muted-foreground">
-          Total Employees: {total}
+        <div>
+          <h1 className="text-3xl font-bold">Employee Directory</h1>
+          <p className="text-muted-foreground mt-1">Manage and view all employees across the organization.</p>
+        </div>
+        <div className="text-sm bg-muted px-3 py-1 rounded-full font-medium">
+          Total: {total}
         </div>
       </div>
 
-      <div className="rounded-md border">
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+        <div className="lg:col-span-2 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search name, email, or code..."
+            className="w-full pl-10 pr-4 py-2 rounded-md border border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+        </div>
+        
+        <select
+          className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          value={country}
+          onChange={(e) => updateFilters({ country: e.target.value })}
+        >
+          <option value="">All Countries</option>
+          {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+
+        <select
+          className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          value={department}
+          onChange={(e) => updateFilters({ department: e.target.value })}
+        >
+          <option value="">All Departments</option>
+          {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+        </select>
+
+        <select
+          className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          value={level}
+          onChange={(e) => updateFilters({ level: e.target.value })}
+        >
+          <option value="">All Levels</option>
+          {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+        </select>
+
+        <select
+          className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          value={status}
+          onChange={(e) => updateFilters({ status: e.target.value })}
+        >
+          <option value="">All Statuses</option>
+          {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </div>
+
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Code</TableHead>
-              <TableHead>Name</TableHead>
+              <TableHead className="w-[100px]">Code</TableHead>
+              <TableHead className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort("name")}>
+                <div className="flex items-center">
+                  Name <SortIcon field="name" />
+                </div>
+              </TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Department</TableHead>
               <TableHead>Level</TableHead>
+              <TableHead className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort("hireDate")}>
+                <div className="flex items-center">
+                  Hire Date <SortIcon field="hireDate" />
+                </div>
+              </TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Base (USD)</TableHead>
+              <TableHead className="text-right cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort("salary")}>
+                <div className="flex items-center justify-end">
+                  Salary (USD) <SortIcon field="salary" />
+                </div>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              Array.from({ length: 5 }).map((_, i) => (
+              Array.from({ length: 10 }).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                   <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : employees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  No employees found.
+                <TableCell colSpan={8} className="h-32 text-center">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                    <Filter className="h-8 w-8 mb-2 opacity-20" />
+                    <p>No employees found matching your filters.</p>
+                    <Button 
+                      variant="link" 
+                      onClick={() => router.push(pathname)}
+                      className="mt-2"
+                    >
+                      Clear all filters
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
               employees.map((employee) => (
                 <TableRow key={employee.id}>
-                  <TableCell className="font-medium">{employee.employee_code}</TableCell>
-                  <TableCell>{`${employee.first_name} ${employee.last_name}`}</TableCell>
-                  <TableCell>{employee.email}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">{employee.employee_code}</TableCell>
+                  <TableCell className="font-medium">{`${employee.first_name} ${employee.last_name}`}</TableCell>
+                  <TableCell className="text-muted-foreground">{employee.email}</TableCell>
                   <TableCell>{employee.department_name}</TableCell>
-                  <TableCell>{employee.level}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      employee.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    <span className="px-2 py-0.5 rounded bg-muted text-xs font-medium">
+                      {employee.level}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {new Date(employee.hire_date).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      employee.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
                     }`}>
                       {employee.status}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right font-mono">
                     {new Intl.NumberFormat('en-US', {
                       style: 'currency',
                       currency: 'USD',
+                      maximumFractionDigits: 0
                     }).format(employee.base_usd)}
                   </TableCell>
                 </TableRow>
@@ -147,7 +304,10 @@ export default function EmployeesPage() {
       </div>
 
       {totalPages > 1 && (
-        <div className="mt-6">
+        <div className="mt-6 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Showing {employees.length} of {total} employees
+          </div>
           <Pagination>
             <PaginationContent>
               <PaginationItem>
@@ -158,7 +318,6 @@ export default function EmployeesPage() {
                 />
               </PaginationItem>
               
-              {/* Simple pagination - show current and neighbors */}
               {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
                 let pageNum: number;
                 if (totalPages <= 5) {

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from passlib.context import CryptContext
 
-from app.database import AsyncSessionLocal, engine
+from app.database import AsyncSessionLocal, engine, Base
 from app.models import Employee, Department, Compensation, User, FxRate
 from scripts.generators import DataGenerator, COUNTRIES, DEPARTMENTS, LEVELS
 
@@ -163,6 +163,7 @@ async def seed_employees(session: AsyncSession, dept_map: Dict[str, int], num_em
                 "country": emp_data["country"],
                 "level": emp_data["level"],
                 "status": emp_data["status"],
+                "hire_date": emp_data["hire_date"],
                 "department_id": emp_data["department_id"],
                 "manager_id": manager_id
             })
@@ -232,9 +233,7 @@ async def main():
         print("Running in FIXTURE mode (20 employees)...")
 
     async with engine.begin() as conn:
-        # Optional: ensure tables exist if not using migrations
-        # await conn.run_sync(Base.metadata.create_all)
-        pass
+        await conn.run_sync(Base.metadata.create_all)
 
     async with AsyncSessionLocal() as session:
         await clear_database(session)

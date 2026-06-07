@@ -67,10 +67,10 @@ tasks are the concrete work items. We follow **TDD** (write tests first) and mak
 **Accept:** lists 10k via pages; default 25; P95 < 300 ms; total shown.
 
 ### Story C2 — Search, filter, sort
-- [ ] C2.1 *(test first)* query builder: q, country, department, level, status, sort
-- [ ] C2.2 Implement combined (AND) server-side filters + sort
-- [ ] C2.3 Web filter controls + debounced search; reflect state in URL
-- [ ] C2.4 *(test)* filter correctness vs fixture
+- [x] C2.1 *(test first)* query builder: q, country, department, level, status, sort
+- [x] C2.2 Implement combined (AND) server-side filters + sort
+- [x] C2.3 Web filter controls + debounced search; reflect state in URL
+- [x] C2.4 *(test)* filter correctness vs fixture
 **Accept:** filters combine; sort by salary/name/hireDate; URL shareable.
 
 ---

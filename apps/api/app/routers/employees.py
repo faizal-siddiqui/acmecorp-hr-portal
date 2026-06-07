@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,7 +17,16 @@ router = APIRouter(
 async def get_employees(
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=100),
+    q: Optional[str] = Query(None),
+    country: Optional[str] = Query(None),
+    department: Optional[str] = Query(None),
+    level: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
+    sort_by: Optional[str] = Query(None),
+    sort_order: str = Query("asc", pattern="^(asc|desc)$"),
     db: AsyncSession = Depends(get_db)
 ):
     service = EmployeeService(db)
-    return await service.get_paginated_employees(page, page_size)
+    return await service.get_paginated_employees(
+        page, page_size, q, country, department, level, status, sort_by, sort_order
+    )

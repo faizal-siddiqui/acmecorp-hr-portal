@@ -27,6 +27,7 @@ class Employee(Base):
     country: Mapped[str] = mapped_column(String(2), index=True, nullable=False)  # ISO 3166-1 alpha-2
     level: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
     status: Mapped[str] = mapped_column(String(50), index=True, nullable=False, default="active")
+    hire_date: Mapped[date] = mapped_column(Date, index=True, nullable=False)
     department_id: Mapped[int] = mapped_column(
         ForeignKey("department.id"), index=True, nullable=False
     )

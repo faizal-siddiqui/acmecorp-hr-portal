@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Optional
 from pydantic import BaseModel, EmailStr, ConfigDict
 
@@ -42,6 +43,7 @@ class EmployeeListItem(BaseModel):
     country: str
     level: str
     status: str
+    hire_date: date
     department_name: str
     base_annual: int
     currency: str

@@ -54,6 +54,7 @@ async def test_create_employee_with_department(mem_session: AsyncSession):
         country="US",
         level="L4",
         status="active",
+        hire_date=date(2026, 1, 1),
         department_id=dept.id,
     )
     mem_session.add(emp)
@@ -78,6 +79,7 @@ async def test_create_compensation(mem_session: AsyncSession):
         country="US",
         level="L4",
         status="active",
+        hire_date=date(2026, 1, 1),
         department_id=dept.id,
     )
     mem_session.add(emp)
@@ -115,6 +117,7 @@ async def test_create_salary_history(mem_session: AsyncSession):
         country="US",
         level="L4",
         status="active",
+        hire_date=date(2026, 1, 1),
         department_id=dept.id,
     )
     mem_session.add(emp)
