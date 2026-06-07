@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 
 class UserBase(BaseModel):
@@ -62,3 +62,10 @@ class PaginatedEmployees(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class CompensationUpdate(BaseModel):
+    base_annual: int = Field(..., gt=0)
+    bonus_annual: int = Field(..., ge=0)
+    currency: str = Field(..., min_length=3, max_length=3)
+    effective_date: date

@@ -4,8 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
 from ..services.employee_service import EmployeeService
-from ..schemas import PaginatedEmployees, EmployeeDetail
+from ..schemas import PaginatedEmployees, EmployeeDetail, CompensationUpdate
 from ..dependencies import get_current_user
+from ..models import User
 
 router = APIRouter(
     prefix="/employees",
@@ -41,3 +42,16 @@ async def get_employee_detail(
     if not employee:
         raise HTTPException(status_code=404, detail="Employee not found")
     return employee
+
+@router.patch("/{employee_id}/compensation")
+async def update_compensation(
+    employee_id: int,
+    update_data: CompensationUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    service = EmployeeService(db)
+    try:
+        return await service.update_compensation(employee_id, update_data, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

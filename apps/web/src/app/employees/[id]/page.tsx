@@ -13,10 +13,12 @@ import {
   DollarSign,
   TrendingUp,
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  Edit
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CompensationEditForm } from "@/components/CompensationEditForm";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -28,19 +30,21 @@ export default function EmployeeDetailPage({ params }: PageProps) {
   const [employee, setEmployee] = useState<EmployeeDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const fetchEmployee = async () => {
+    try {
+      setLoading(true);
+      const data = await getEmployee(resolvedParams.id);
+      setEmployee(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load employee details");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        const data = await getEmployee(resolvedParams.id);
-        setEmployee(data);
-      } catch (err: any) {
-        setError(err.message || "Failed to load employee details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEmployee();
   }, [resolvedParams.id]);
 
@@ -217,7 +221,12 @@ export default function EmployeeDetailPage({ params }: PageProps) {
               <Button className="w-full justify-start" variant="outline" disabled>
                 Edit Profile
               </Button>
-              <Button className="w-full justify-start" variant="outline" disabled>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => setIsEditModalOpen(true)}
+              >
+                <Edit className="h-4 w-4 mr-2" />
                 Update Compensation
               </Button>
               <Button className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" variant="ghost" disabled>
@@ -234,6 +243,14 @@ export default function EmployeeDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      {isEditModalOpen && (
+        <CompensationEditForm 
+          employee={employee} 
+          onClose={() => setIsEditModalOpen(false)}
+          onSuccess={() => fetchEmployee()}
+        />
+      )}
     </div>
   );
 }

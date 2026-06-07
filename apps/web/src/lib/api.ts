@@ -59,3 +59,22 @@ export async function getEmployee(id: string): Promise<EmployeeDetail> {
   }
   return response.json();
 }
+
+export interface CompensationUpdate {
+  base_annual: number;
+  bonus_annual: number;
+  currency: string;
+  effective_date: string;
+}
+
+export async function updateCompensation(id: number, data: CompensationUpdate) {
+  const response = await apiFetch(`/employees/${id}/compensation`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to update compensation");
+  }
+  return response.json();
+}

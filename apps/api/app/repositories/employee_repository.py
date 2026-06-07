@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, or_, desc
-from ..models import Employee, Department, Compensation, FxRate
+from sqlalchemy import select, func, or_, desc, update
+from ..models import Employee, Department, Compensation, FxRate, SalaryChangeHistory
 
 class EmployeeRepository:
     def __init__(self, db: AsyncSession):
@@ -121,3 +121,27 @@ class EmployeeRepository:
         
         result = await self.db.execute(stmt)
         return result.first()
+
+    async def get_current_compensation(self, employee_id: int) -> Optional[Compensation]:
+        stmt = select(Compensation).where(
+            (Compensation.employee_id == employee_id) & (Compensation.is_current == True)
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_fx_rate(self, currency: str) -> Optional[FxRate]:
+        stmt = select(FxRate).where(FxRate.currency == currency)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def deactivate_compensations(self, employee_id: int):
+        stmt = update(Compensation).where(
+            (Compensation.employee_id == employee_id) & (Compensation.is_current == True)
+        ).values(is_current=False)
+        await self.db.execute(stmt)
+
+    async def add_compensation(self, compensation: Compensation):
+        self.db.add(compensation)
+
+    async def add_history_records(self, history_records: List[SalaryChangeHistory]):
+        self.db.add_all(history_records)
