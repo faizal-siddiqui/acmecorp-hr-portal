@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { Search, ArrowUpDown, ArrowUp, ArrowDown, Filter } from "lucide-react";
@@ -44,7 +44,12 @@ const DEPARTMENTS = ["Engineering", "Sales", "Marketing", "Finance", "HR", "Oper
 const LEVELS = ["L1", "L2", "L3", "L4", "L5", "L6", "L7"];
 const STATUSES = ["active", "inactive"];
 
-export default function EmployeesPage() {
+const SortIcon = ({ field, sortBy, sortOrder }: { field: string; sortBy: string; sortOrder: string }) => {
+  if (sortBy !== field) return <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />;
+  return sortOrder === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />;
+};
+
+function EmployeesPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -81,43 +86,56 @@ export default function EmployeesPage() {
     router.push(`${pathname}?${params.toString()}`);
   }, [router, pathname, searchParams]);
 
-  const fetchEmployees = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        page_size: pageSize.toString(),
-        ...(q && { q }),
-        ...(country && { country }),
-        ...(department && { department }),
-        ...(level && { level }),
-        ...(status && { status }),
-        ...(sortBy && { sort_by: sortBy }),
-        ...(sortOrder && { sort_order: sortOrder }),
-      });
-
-      const response = await apiFetch(`/employees/?${params.toString()}`);
-      if (response.ok) {
-        const data = await response.json();
-        setEmployees(data.items);
-        setTotal(data.total);
-      }
-    } catch (error) {
-      console.error("Failed to fetch employees:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, q, country, department, level, status, sortBy, sortOrder]);
-
   useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
+    let ignore = false;
+    
+    const startFetching = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          page_size: pageSize.toString(),
+          ...(q && { q }),
+          ...(country && { country }),
+          ...(department && { department }),
+          ...(level && { level }),
+          ...(status && { status }),
+          ...(sortBy && { sort_by: sortBy }),
+          ...(sortOrder && { sort_order: sortOrder }),
+        });
+
+        const response = await apiFetch(`/employees/?${params.toString()}`);
+        if (response.ok && !ignore) {
+          const data = await response.json();
+          setEmployees(data.items);
+          setTotal(data.total);
+        }
+      } catch (error) {
+        if (!ignore) {
+          console.error("Failed to fetch employees:", error);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    };
+
+    startFetching();
+    
+    return () => {
+      ignore = true;
+    };
+  }, [page, pageSize, q, country, department, level, status, sortBy, sortOrder]);
 
   // Debounced search
   const [searchInput, setSearchInput] = useState(q);
-  useEffect(() => {
+  const [prevQ, setPrevQ] = useState(q);
+
+  if (q !== prevQ) {
     setSearchInput(q);
-  }, [q]);
+    setPrevQ(q);
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -134,11 +152,6 @@ export default function EmployeesPage() {
     } else {
       updateFilters({ sort_by: field, sort_order: "asc" });
     }
-  };
-
-  const SortIcon = ({ field }: { field: string }) => {
-    if (sortBy !== field) return <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />;
-    return sortOrder === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />;
   };
 
   const totalPages = Math.ceil(total / pageSize);
@@ -218,7 +231,7 @@ export default function EmployeesPage() {
               <TableHead className="w-[100px]">Code</TableHead>
               <TableHead className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort("name")}>
                 <div className="flex items-center">
-                  Name <SortIcon field="name" />
+                  Name <SortIcon field="name" sortBy={sortBy} sortOrder={sortOrder} />
                 </div>
               </TableHead>
               <TableHead>Email</TableHead>
@@ -226,13 +239,13 @@ export default function EmployeesPage() {
               <TableHead>Level</TableHead>
               <TableHead className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort("hireDate")}>
                 <div className="flex items-center">
-                  Hire Date <SortIcon field="hireDate" />
+                  Hire Date <SortIcon field="hireDate" sortBy={sortBy} sortOrder={sortOrder} />
                 </div>
               </TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort("salary")}>
                 <div className="flex items-center justify-end">
-                  Salary (USD) <SortIcon field="salary" />
+                  Salary (USD) <SortIcon field="salary" sortBy={sortBy} sortOrder={sortOrder} />
                 </div>
               </TableHead>
             </TableRow>
@@ -355,5 +368,60 @@ export default function EmployeesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function EmployeesPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto py-10">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <Skeleton className="h-10 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-6 w-24 rounded-full" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+          <Skeleton className="lg:col-span-2 h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="rounded-md border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]"><Skeleton className="h-4 w-12" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-32" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-16" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-20" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-16" /></TableHead>
+                <TableHead className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 10 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    }>
+      <EmployeesPageContent />
+    </Suspense>
   );
 }
