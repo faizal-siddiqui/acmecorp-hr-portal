@@ -4,6 +4,24 @@ HR salary management system for ACME Corp — employee directory, compensation a
 
 ## 🚀 Quick Start (5-minute path)
 
+### Option A: Automatic Setup (Recommended)
+
+Run the setup script for your platform. This will install all dependencies, set up environment files, seed the database, and start the development servers.
+
+**macOS / Linux:**
+```bash
+./run-dev.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+./run-dev.ps1
+```
+
+---
+
+### Option B: Manual Setup
+
 ```bash
 # 1. Clone and install all dependencies
 npm install && cd apps/web && npm install && cd ../..

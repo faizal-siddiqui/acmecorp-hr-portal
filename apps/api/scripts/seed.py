@@ -60,13 +60,13 @@ async def seed_fx_rates(session: AsyncSession):
 
 async def seed_hr_user(session: AsyncSession):
     """Seeds one HR manager user."""
-    print("Seeding HR user...")
+    print("Seding HR user...")
     # Use bcrypt directly to match app/auth.py
     password = settings.seed_admin_password
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
     user = User(
-        email="maya@example.com",
+        email="admin@acme.com",
         password_hash=hashed_password,
         role="hr_manager"
     )
