@@ -59,10 +59,6 @@ export default function HomePage() {
           Logout
         </Button>
       </div>
-
-      <p className="text-muted-foreground rounded border px-4 py-2 font-mono text-sm">
-        ✅ Authentication Implemented (Story B1)
-      </p>
     </main>
   );
 }

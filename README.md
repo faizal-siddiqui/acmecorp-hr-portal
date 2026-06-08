@@ -69,7 +69,7 @@ This is a monorepo containing:
 ### Frontend (`apps/web/.env.local`)
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_API_URL` | Backend API base URL | `http://localhost:8000` |
+| `INTERNAL_API_URL` | Backend API base URL (used by proxy) | `http://localhost:8000` |
 
 ## API Summary
 
@@ -114,7 +114,7 @@ npm run format  # Auto-format code
 ## Deployment
 
 ### Frontend (Vercel)
-The frontend is a standard Next.js app. Point Vercel to the `apps/web` directory and set `NEXT_PUBLIC_API_URL`.
+The frontend is a standard Next.js app. Point Vercel to the `apps/web` directory and set `INTERNAL_API_URL`.
 
 ### Backend (Docker/Render/Fly)
 The backend can be containerized using the provided `Dockerfile` (to be added) or deployed directly to a Python-capable host. Ensure `DATABASE_URL` points to a persistent PostgreSQL instance in production.
