@@ -1,6 +1,8 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from app.database import Base
+
 
 @pytest.fixture
 async def mem_engine():
@@ -13,6 +15,7 @@ async def mem_engine():
         await conn.run_sync(Base.metadata.create_all)
     yield engine
     await engine.dispose()
+
 
 @pytest.fixture
 async def db_session(mem_engine):

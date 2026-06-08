@@ -13,7 +13,7 @@ export function AnalyticsKPIs() {
 
   useEffect(() => {
     let ignore = false;
-    
+
     const fetchSummary = async () => {
       setLoading(true);
       try {
@@ -40,26 +40,26 @@ export function AnalyticsKPIs() {
     };
 
     fetchSummary();
-    
+
     return () => {
       ignore = true;
     };
   }, [searchParams]);
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-card border rounded-lg p-6 shadow-sm">
-            <Skeleton className="h-4 w-24 mb-4" />
+          <div key={i} className="bg-card rounded-lg border p-6 shadow-sm">
+            <Skeleton className="mb-4 h-4 w-24" />
             <Skeleton className="h-8 w-32" />
           </div>
         ))}
@@ -70,46 +70,46 @@ export function AnalyticsKPIs() {
   if (!summary) return null;
 
   return (
-    <div className="space-y-2 mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-card border rounded-lg p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-muted-foreground">Headcount</span>
-            <Users className="h-4 w-4 text-muted-foreground opacity-70" />
+    <div className="mb-8 space-y-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="bg-card rounded-lg border p-6 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-muted-foreground text-sm font-medium">Headcount</span>
+            <Users className="text-muted-foreground h-4 w-4 opacity-70" />
           </div>
           <div className="text-2xl font-bold">{summary.headcount}</div>
-          <p className="text-xs text-muted-foreground mt-1">Active employees</p>
+          <p className="text-muted-foreground mt-1 text-xs">Active employees</p>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-muted-foreground">Total Payroll</span>
-            <DollarSign className="h-4 w-4 text-muted-foreground opacity-70" />
+        <div className="bg-card rounded-lg border p-6 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-muted-foreground text-sm font-medium">Total Payroll</span>
+            <DollarSign className="text-muted-foreground h-4 w-4 opacity-70" />
           </div>
           <div className="text-2xl font-bold">{formatCurrency(summary.total_payroll_usd)}</div>
-          <p className="text-xs text-muted-foreground mt-1">Annual USD normalized</p>
+          <p className="text-muted-foreground mt-1 text-xs">Annual USD normalized</p>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-muted-foreground">Average Pay</span>
-            <TrendingUp className="h-4 w-4 text-muted-foreground opacity-70" />
+        <div className="bg-card rounded-lg border p-6 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-muted-foreground text-sm font-medium">Average Pay</span>
+            <TrendingUp className="text-muted-foreground h-4 w-4 opacity-70" />
           </div>
           <div className="text-2xl font-bold">{formatCurrency(summary.avg_payroll_usd)}</div>
-          <p className="text-xs text-muted-foreground mt-1">Per employee (USD)</p>
+          <p className="text-muted-foreground mt-1 text-xs">Per employee (USD)</p>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-muted-foreground">Median Pay</span>
-            <BarChart3 className="h-4 w-4 text-muted-foreground opacity-70" />
+        <div className="bg-card rounded-lg border p-6 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-muted-foreground text-sm font-medium">Median Pay</span>
+            <BarChart3 className="text-muted-foreground h-4 w-4 opacity-70" />
           </div>
           <div className="text-2xl font-bold">{formatCurrency(summary.median_payroll_usd)}</div>
-          <p className="text-xs text-muted-foreground mt-1">Per employee (USD)</p>
+          <p className="text-muted-foreground mt-1 text-xs">Per employee (USD)</p>
         </div>
       </div>
-      
-      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground px-1">
+
+      <div className="text-muted-foreground flex items-center gap-1.5 px-1 text-[10px]">
         <Info className="h-3 w-3" />
         <span>FX rates as of {new Date(summary.fx_as_of).toLocaleDateString()}</span>
       </div>

@@ -26,8 +26,8 @@ async def get_current_user(
         if email is None:
             raise credentials_exception
         token_data = schemas.TokenData(email=email)
-    except JWTError:
-        raise credentials_exception
+    except JWTError as err:
+        raise credentials_exception from err
 
     result = await db.execute(select(models.User).where(models.User.email == token_data.email))
     user = result.scalar_one_or_none()

@@ -67,7 +67,10 @@ export interface CompensationUpdate {
   effective_date: string;
 }
 
-export async function updateCompensation(id: number, data: CompensationUpdate) {
+export async function updateCompensation(
+  id: number,
+  data: CompensationUpdate,
+): Promise<EmployeeDetail> {
   const response = await apiFetch(`/employees/${id}/compensation`, {
     method: "PATCH",
     body: JSON.stringify(data),

@@ -8,7 +8,6 @@ import { apiFetch } from "@/lib/api";
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
 

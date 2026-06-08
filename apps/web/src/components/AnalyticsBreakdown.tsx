@@ -23,7 +23,7 @@ export function AnalyticsBreakdown() {
 
   useEffect(() => {
     let ignore = false;
-    
+
     const fetchBreakdown = async () => {
       setLoading(true);
       try {
@@ -50,38 +50,38 @@ export function AnalyticsBreakdown() {
     };
 
     fetchBreakdown();
-    
+
     return () => {
       ignore = true;
     };
   }, [searchParams, groupBy]);
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
-  const maxAvg = data ? Math.max(...data.items.map(i => i.avg_usd)) : 0;
+  const maxAvg = data ? Math.max(...data.items.map((i) => i.avg_usd)) : 0;
 
   return (
-    <div className="space-y-6 bg-card border rounded-xl p-6 shadow-sm">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="bg-card space-y-6 rounded-xl border p-6 shadow-sm">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-xl font-bold">Pay Breakdowns</h2>
-          <p className="text-sm text-muted-foreground">Detailed aggregates by dimension.</p>
+          <p className="text-muted-foreground text-sm">Detailed aggregates by dimension.</p>
         </div>
-        
-        <div className="flex bg-muted p-1 rounded-lg">
+
+        <div className="bg-muted flex rounded-lg p-1">
           {(["department", "country", "level"] as GroupBy[]).map((option) => (
             <button
               key={option}
               onClick={() => setGroupBy(option)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                groupBy === option 
-                  ? "bg-background text-foreground shadow-sm" 
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
+                groupBy === option
+                  ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -97,10 +97,12 @@ export function AnalyticsBreakdown() {
           <Skeleton className="h-[300px] w-full" />
         </div>
       ) : data && data.items.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Chart Section */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Average Salary (USD)</h3>
+            <h3 className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+              Average Salary (USD)
+            </h3>
             <div className="space-y-3">
               {data.items.map((item) => (
                 <div key={item.dimension_value} className="space-y-1">
@@ -108,9 +110,9 @@ export function AnalyticsBreakdown() {
                     <span>{item.dimension_value}</span>
                     <span>{formatCurrency(item.avg_usd)}</span>
                   </div>
-                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary transition-all duration-500 ease-out"
+                  <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                    <div
+                      className="bg-primary h-full transition-all duration-500 ease-out"
                       style={{ width: `${(item.avg_usd / maxAvg) * 100}%` }}
                     />
                   </div>
@@ -120,25 +122,31 @@ export function AnalyticsBreakdown() {
           </div>
 
           {/* Table Section */}
-          <div className="overflow-hidden rounded-lg border bg-background">
+          <div className="bg-background overflow-hidden rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="py-2">{groupBy.charAt(0).toUpperCase() + groupBy.slice(1)}</TableHead>
-                  <TableHead className="text-right py-2">Count</TableHead>
-                  <TableHead className="text-right py-2">Avg</TableHead>
-                  <TableHead className="text-right py-2">Median</TableHead>
-                  <TableHead className="text-right py-2">Range (Min-Max)</TableHead>
+                  <TableHead className="py-2">
+                    {groupBy.charAt(0).toUpperCase() + groupBy.slice(1)}
+                  </TableHead>
+                  <TableHead className="py-2 text-right">Count</TableHead>
+                  <TableHead className="py-2 text-right">Avg</TableHead>
+                  <TableHead className="py-2 text-right">Median</TableHead>
+                  <TableHead className="py-2 text-right">Range (Min-Max)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.items.map((item) => (
                   <TableRow key={item.dimension_value}>
-                    <TableCell className="font-medium py-2">{item.dimension_value}</TableCell>
-                    <TableCell className="text-right py-2">{item.count}</TableCell>
-                    <TableCell className="text-right py-2">{formatCurrency(item.avg_usd)}</TableCell>
-                    <TableCell className="text-right py-2">{formatCurrency(item.median_usd)}</TableCell>
-                    <TableCell className="text-right py-2 text-xs text-muted-foreground">
+                    <TableCell className="py-2 font-medium">{item.dimension_value}</TableCell>
+                    <TableCell className="py-2 text-right">{item.count}</TableCell>
+                    <TableCell className="py-2 text-right">
+                      {formatCurrency(item.avg_usd)}
+                    </TableCell>
+                    <TableCell className="py-2 text-right">
+                      {formatCurrency(item.median_usd)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground py-2 text-right text-xs">
                       {formatCurrency(item.min_usd)} - {formatCurrency(item.max_usd)}
                     </TableCell>
                   </TableRow>
@@ -148,7 +156,7 @@ export function AnalyticsBreakdown() {
           </div>
         </div>
       ) : (
-        <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground">
+        <div className="text-muted-foreground flex h-[300px] items-center justify-center rounded-lg border-2 border-dashed">
           No data available for this dimension.
         </div>
       )}

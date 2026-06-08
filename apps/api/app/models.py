@@ -1,7 +1,7 @@
-from datetime import date, datetime, timezone
-from typing import Optional, List
+from datetime import UTC, date, datetime
+from typing import Optional
 
-from sqlalchemy import ForeignKey, Integer, String, Boolean, Date, DateTime, Float, Text
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -13,7 +13,7 @@ class Department(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
 
-    employees: Mapped[List["Employee"]] = relationship(back_populates="department")
+    employees: Mapped[list["Employee"]] = relationship(back_populates="department")
 
 
 class Employee(Base):
@@ -24,19 +24,21 @@ class Employee(Base):
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    country: Mapped[str] = mapped_column(String(2), index=True, nullable=False)  # ISO 3166-1 alpha-2
+    country: Mapped[str] = mapped_column(
+        String(2), index=True, nullable=False
+    )  # ISO 3166-1 alpha-2
     level: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
     status: Mapped[str] = mapped_column(String(50), index=True, nullable=False, default="active")
     hire_date: Mapped[date] = mapped_column(Date, index=True, nullable=False)
     department_id: Mapped[int] = mapped_column(
         ForeignKey("department.id"), index=True, nullable=False
     )
-    manager_id: Mapped[Optional[int]] = mapped_column(ForeignKey("employee.id"), nullable=True)
+    manager_id: Mapped[int | None] = mapped_column(ForeignKey("employee.id"), nullable=True)
 
     department: Mapped["Department"] = relationship(back_populates="employees")
     manager: Mapped[Optional["Employee"]] = relationship(remote_side=[id], backref="subordinates")
-    compensations: Mapped[List["Compensation"]] = relationship(back_populates="employee")
-    salary_history: Mapped[List["SalaryChangeHistory"]] = relationship(back_populates="employee")
+    compensations: Mapped[list["Compensation"]] = relationship(back_populates="employee")
+    salary_history: Mapped[list["SalaryChangeHistory"]] = relationship(back_populates="employee")
 
 
 class Compensation(Base):
@@ -63,9 +65,9 @@ class SalaryChangeHistory(Base):
     new_value: Mapped[str] = mapped_column(Text, nullable=False)
     changed_by: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     changed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
-    note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     employee: Mapped["Employee"] = relationship(back_populates="salary_history")
     changed_by_user: Mapped["User"] = relationship()

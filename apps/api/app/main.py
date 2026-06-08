@@ -2,12 +2,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import (
-    auth_router,
-    employees_router,
-    analytics_router,
-    export_router
-)
+from .routers import analytics_router, auth_router, employees_router, export_router
 
 app = FastAPI(
     title="Salary Management API",

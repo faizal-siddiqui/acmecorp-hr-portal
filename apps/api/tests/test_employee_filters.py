@@ -1,8 +1,11 @@
+from datetime import date
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import Compensation, Department, Employee, FxRate
 from app.repositories import EmployeeRepository
-from app.models import Employee, Department, Compensation, FxRate
-from datetime import date
+
 
 @pytest.mark.asyncio
 async def test_employee_filters_and_sort(db_session: AsyncSession):
@@ -20,26 +23,44 @@ async def test_employee_filters_and_sort(db_session: AsyncSession):
 
     # Setup: Create employees
     e1 = Employee(
-        employee_code="E1", first_name="Alice", last_name="Zebra", 
-        email="alice@example.com", country="US", level="L3", status="active",
-        hire_date=date(2020, 1, 1), department_id=dept1.id
+        employee_code="E1",
+        first_name="Alice",
+        last_name="Zebra",
+        email="alice@example.com",
+        country="US",
+        level="L3",
+        status="active",
+        hire_date=date(2020, 1, 1),
+        department_id=dept1.id,
     )
     e2 = Employee(
-        employee_code="E2", first_name="Bob", last_name="Alpha", 
-        email="bob@example.com", country="DE", level="L1", status="inactive",
-        hire_date=date(2021, 1, 1), department_id=dept2.id
+        employee_code="E2",
+        first_name="Bob",
+        last_name="Alpha",
+        email="bob@example.com",
+        country="DE",
+        level="L1",
+        status="inactive",
+        hire_date=date(2021, 1, 1),
+        department_id=dept2.id,
     )
     db_session.add_all([e1, e2])
     await db_session.flush()
 
     # Setup: Create compensations
     c1 = Compensation(
-        employee_id=e1.id, base_annual=100000, currency="USD", 
-        effective_date=date(2020, 1, 1), is_current=True
+        employee_id=e1.id,
+        base_annual=100000,
+        currency="USD",
+        effective_date=date(2020, 1, 1),
+        is_current=True,
     )
     c2 = Compensation(
-        employee_id=e2.id, base_annual=80000, currency="EUR", 
-        effective_date=date(2021, 1, 1), is_current=True
+        employee_id=e2.id,
+        base_annual=80000,
+        currency="EUR",
+        effective_date=date(2021, 1, 1),
+        is_current=True,
     )
     db_session.add_all([c1, c2])
     await db_session.commit()
@@ -63,8 +84,8 @@ async def test_employee_filters_and_sort(db_session: AsyncSession):
 
     # Test: Sort by name (last_name) asc
     items, total = await repo.get_employees(1, 10, sort_by="name", sort_order="asc")
-    assert items[0].last_name == "Alpha" # Bob Alpha
-    assert items[1].last_name == "Zebra" # Alice Zebra
+    assert items[0].last_name == "Alpha"  # Bob Alpha
+    assert items[1].last_name == "Zebra"  # Alice Zebra
 
     # Test: Sort by name (last_name) desc
     items, total = await repo.get_employees(1, 10, sort_by="name", sort_order="desc")

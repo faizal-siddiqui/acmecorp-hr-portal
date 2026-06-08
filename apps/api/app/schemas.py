@@ -1,6 +1,6 @@
 from datetime import date, datetime
-from typing import Optional
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserBase(BaseModel):
@@ -24,7 +24,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    email: Optional[str] = None
+    email: str | None = None
 
 
 class LoginRequest(BaseModel):
@@ -77,11 +77,11 @@ class SalaryHistoryItem(BaseModel):
     id: int
     employee_id: int
     field: str
-    old_value: Optional[str]
+    old_value: str | None
     new_value: str
     changed_by_email: str
     changed_at: datetime
-    note: Optional[str]
+    note: str | None
 
 
 class EmployeeCreate(BaseModel):
@@ -93,7 +93,7 @@ class EmployeeCreate(BaseModel):
     level: str = Field(..., min_length=1, max_length=50)
     hire_date: date
     department_id: int
-    
+
     # Initial compensation
     base_annual: int = Field(..., gt=0)
     bonus_annual: int = Field(0, ge=0)

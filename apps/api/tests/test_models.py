@@ -1,15 +1,16 @@
+from datetime import UTC, date, datetime
+
 import pytest
-from datetime import date, datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.database import Base
 from app.models import (
+    Compensation,
     Department,
     Employee,
-    Compensation,
-    SalaryChangeHistory,
     FxRate,
+    SalaryChangeHistory,
     User,
 )
 
@@ -96,7 +97,9 @@ async def test_create_compensation(mem_session: AsyncSession):
     mem_session.add(comp)
     await mem_session.commit()
 
-    result = await mem_session.execute(select(Compensation).where(Compensation.employee_id == emp.id))
+    result = await mem_session.execute(
+        select(Compensation).where(Compensation.employee_id == emp.id)
+    )
     saved_comp = result.scalar_one()
     assert saved_comp.base_annual == 100000
     assert saved_comp.currency == "USD"
@@ -129,7 +132,7 @@ async def test_create_salary_history(mem_session: AsyncSession):
         old_value="90000",
         new_value="100000",
         changed_by=user.id,
-        changed_at=datetime.now(timezone.utc),
+        changed_at=datetime.now(UTC),
         note="Annual increase",
     )
     mem_session.add(history)

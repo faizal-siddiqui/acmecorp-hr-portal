@@ -1,21 +1,25 @@
-import pytest
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.main import app
-from app.database import get_db
-from app.models import User, Employee, Department, Compensation, FxRate
-from app.auth import get_password_hash
 from datetime import date
+
+import pytest
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.auth import get_password_hash
+from app.database import get_db
+from app.main import app
+from app.models import Compensation, Department, Employee, FxRate, User
+
 
 @pytest.fixture
 async def client(db_session: AsyncSession):
     async def override_get_db():
         yield db_session
-    
+
     app.dependency_overrides[get_db] = override_get_db
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()
+
 
 @pytest.mark.asyncio
 async def test_get_analytics_summary_success(client: AsyncClient, db_session: AsyncSession):
@@ -38,41 +42,95 @@ async def test_get_analytics_summary_success(client: AsyncClient, db_session: As
     # Employees
     # E1: 100k USD base + 10k bonus = 110k USD
     emp1 = Employee(
-        employee_code="E1", first_name="Alice", last_name="A", 
-        email="alice@example.com", country="US", level="L3", status="active",
-        hire_date=date(2020, 1, 1), department_id=dept.id
+        employee_code="E1",
+        first_name="Alice",
+        last_name="A",
+        email="alice@example.com",
+        country="US",
+        level="L3",
+        status="active",
+        hire_date=date(2020, 1, 1),
+        department_id=dept.id,
     )
     # E2: 80k EUR base + 5k bonus = 85k EUR * 1.1 = 93.5k USD
     emp2 = Employee(
-        employee_code="E2", first_name="Bob", last_name="B", 
-        email="bob@example.com", country="DE", level="L2", status="active",
-        hire_date=date(2021, 1, 1), department_id=dept.id
+        employee_code="E2",
+        first_name="Bob",
+        last_name="B",
+        email="bob@example.com",
+        country="DE",
+        level="L2",
+        status="active",
+        hire_date=date(2021, 1, 1),
+        department_id=dept.id,
     )
     # E3: 120k USD base + 20k bonus = 140k USD
     emp3 = Employee(
-        employee_code="E3", first_name="Charlie", last_name="C", 
-        email="charlie@example.com", country="US", level="L4", status="active",
-        hire_date=date(2019, 1, 1), department_id=dept.id
+        employee_code="E3",
+        first_name="Charlie",
+        last_name="C",
+        email="charlie@example.com",
+        country="US",
+        level="L4",
+        status="active",
+        hire_date=date(2019, 1, 1),
+        department_id=dept.id,
     )
     # E4: Inactive, should be ignored
     emp4 = Employee(
-        employee_code="E4", first_name="Dave", last_name="D", 
-        email="dave@example.com", country="US", level="L1", status="inactive",
-        hire_date=date(2022, 1, 1), department_id=dept.id
+        employee_code="E4",
+        first_name="Dave",
+        last_name="D",
+        email="dave@example.com",
+        country="US",
+        level="L1",
+        status="inactive",
+        hire_date=date(2022, 1, 1),
+        department_id=dept.id,
     )
     db_session.add_all([emp1, emp2, emp3, emp4])
     await db_session.flush()
 
     # Compensations
-    c1 = Compensation(employee_id=emp1.id, base_annual=100000, bonus_annual=10000, currency="USD", effective_date=date(2020, 1, 1), is_current=True)
-    c2 = Compensation(employee_id=emp2.id, base_annual=80000, bonus_annual=5000, currency="EUR", effective_date=date(2021, 1, 1), is_current=True)
-    c3 = Compensation(employee_id=emp3.id, base_annual=120000, bonus_annual=20000, currency="USD", effective_date=date(2019, 1, 1), is_current=True)
-    c4 = Compensation(employee_id=emp4.id, base_annual=50000, bonus_annual=0, currency="USD", effective_date=date(2022, 1, 1), is_current=True)
+    c1 = Compensation(
+        employee_id=emp1.id,
+        base_annual=100000,
+        bonus_annual=10000,
+        currency="USD",
+        effective_date=date(2020, 1, 1),
+        is_current=True,
+    )
+    c2 = Compensation(
+        employee_id=emp2.id,
+        base_annual=80000,
+        bonus_annual=5000,
+        currency="EUR",
+        effective_date=date(2021, 1, 1),
+        is_current=True,
+    )
+    c3 = Compensation(
+        employee_id=emp3.id,
+        base_annual=120000,
+        bonus_annual=20000,
+        currency="USD",
+        effective_date=date(2019, 1, 1),
+        is_current=True,
+    )
+    c4 = Compensation(
+        employee_id=emp4.id,
+        base_annual=50000,
+        bonus_annual=0,
+        currency="USD",
+        effective_date=date(2022, 1, 1),
+        is_current=True,
+    )
     db_session.add_all([c1, c2, c3, c4])
     await db_session.commit()
 
     # Login
-    login_response = await client.post("/auth/login", json={"email": "hr@example.com", "password": "testpassword"})
+    login_response = await client.post(
+        "/auth/login", json={"email": "hr@example.com", "password": "testpassword"}
+    )
     token = login_response.json()["access_token"]
 
     # Execute GET /analytics/summary
@@ -81,19 +139,20 @@ async def test_get_analytics_summary_success(client: AsyncClient, db_session: As
     # Verify
     assert response.status_code == 200
     data = response.json()
-    
+
     # Expected values:
     # Salaries USD: [110000, 93500, 140000]
     # Headcount: 3
     # Total: 110000 + 93500 + 140000 = 343500
     # Avg: 343500 / 3 = 114500
     # Median: sorted [93500, 110000, 140000] -> 110000
-    
+
     assert data["headcount"] == 3
     assert data["total_payroll_usd"] == 343500.0
     assert data["avg_payroll_usd"] == 114500.0
     assert data["median_payroll_usd"] == 110000.0
     assert data["fx_as_of"] == "2026-06-06"
+
 
 @pytest.mark.asyncio
 async def test_get_analytics_summary_with_filters(client: AsyncClient, db_session: AsyncSession):
@@ -113,33 +172,74 @@ async def test_get_analytics_summary_with_filters(client: AsyncClient, db_sessio
     await db_session.flush()
 
     # Alice: Eng, US, L3, 100k
-    emp1 = Employee(employee_code="E1", first_name="Alice", last_name="A", email="alice@example.com", country="US", level="L3", status="active", hire_date=date(2020, 1, 1), department_id=dept_eng.id)
+    emp1 = Employee(
+        employee_code="E1",
+        first_name="Alice",
+        last_name="A",
+        email="alice@example.com",
+        country="US",
+        level="L3",
+        status="active",
+        hire_date=date(2020, 1, 1),
+        department_id=dept_eng.id,
+    )
     # Bob: HR, DE, L2, 80k
-    emp2 = Employee(employee_code="E2", first_name="Bob", last_name="B", email="bob@example.com", country="DE", level="L2", status="active", hire_date=date(2021, 1, 1), department_id=dept_hr.id)
+    emp2 = Employee(
+        employee_code="E2",
+        first_name="Bob",
+        last_name="B",
+        email="bob@example.com",
+        country="DE",
+        level="L2",
+        status="active",
+        hire_date=date(2021, 1, 1),
+        department_id=dept_hr.id,
+    )
     db_session.add_all([emp1, emp2])
     await db_session.flush()
 
-    c1 = Compensation(employee_id=emp1.id, base_annual=100000, bonus_annual=0, currency="USD", effective_date=date(2020, 1, 1), is_current=True)
-    c2 = Compensation(employee_id=emp2.id, base_annual=80000, bonus_annual=0, currency="USD", effective_date=date(2021, 1, 1), is_current=True)
+    c1 = Compensation(
+        employee_id=emp1.id,
+        base_annual=100000,
+        bonus_annual=0,
+        currency="USD",
+        effective_date=date(2020, 1, 1),
+        is_current=True,
+    )
+    c2 = Compensation(
+        employee_id=emp2.id,
+        base_annual=80000,
+        bonus_annual=0,
+        currency="USD",
+        effective_date=date(2021, 1, 1),
+        is_current=True,
+    )
     db_session.add_all([c1, c2])
     await db_session.commit()
 
-    login_response = await client.post("/auth/login", json={"email": "hr@example.com", "password": "testpassword"})
+    login_response = await client.post(
+        "/auth/login", json={"email": "hr@example.com", "password": "testpassword"}
+    )
     token = login_response.json()["access_token"]
 
     # Filter by department=Engineering
-    response = await client.get("/analytics/summary?department=Engineering", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(
+        "/analytics/summary?department=Engineering", headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["headcount"] == 1
     assert data["total_payroll_usd"] == 100000.0
 
     # Filter by country=DE
-    response = await client.get("/analytics/summary?country=DE", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(
+        "/analytics/summary?country=DE", headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["headcount"] == 1
     assert data["total_payroll_usd"] == 80000.0
+
 
 @pytest.mark.asyncio
 async def test_get_analytics_breakdown_success(client: AsyncClient, db_session: AsyncSession):
@@ -159,29 +259,84 @@ async def test_get_analytics_breakdown_success(client: AsyncClient, db_session: 
     await db_session.flush()
 
     # Eng: 100k, 120k -> avg 110k, median 110k, min 100k, max 120k
-    emp1 = Employee(employee_code="E1", first_name="A", last_name="A", email="a@ex.com", country="US", level="L3", status="active", hire_date=date(2020, 1, 1), department_id=dept_eng.id)
-    emp2 = Employee(employee_code="E2", first_name="B", last_name="B", email="b@ex.com", country="US", level="L3", status="active", hire_date=date(2020, 1, 1), department_id=dept_eng.id)
+    emp1 = Employee(
+        employee_code="E1",
+        first_name="A",
+        last_name="A",
+        email="a@ex.com",
+        country="US",
+        level="L3",
+        status="active",
+        hire_date=date(2020, 1, 1),
+        department_id=dept_eng.id,
+    )
+    emp2 = Employee(
+        employee_code="E2",
+        first_name="B",
+        last_name="B",
+        email="b@ex.com",
+        country="US",
+        level="L3",
+        status="active",
+        hire_date=date(2020, 1, 1),
+        department_id=dept_eng.id,
+    )
     # HR: 80k
-    emp3 = Employee(employee_code="E3", first_name="C", last_name="C", email="c@ex.com", country="DE", level="L2", status="active", hire_date=date(2020, 1, 1), department_id=dept_hr.id)
+    emp3 = Employee(
+        employee_code="E3",
+        first_name="C",
+        last_name="C",
+        email="c@ex.com",
+        country="DE",
+        level="L2",
+        status="active",
+        hire_date=date(2020, 1, 1),
+        department_id=dept_hr.id,
+    )
     db_session.add_all([emp1, emp2, emp3])
     await db_session.flush()
 
-    c1 = Compensation(employee_id=emp1.id, base_annual=100000, bonus_annual=0, currency="USD", effective_date=date(2020, 1, 1), is_current=True)
-    c2 = Compensation(employee_id=emp2.id, base_annual=120000, bonus_annual=0, currency="USD", effective_date=date(2020, 1, 1), is_current=True)
-    c3 = Compensation(employee_id=emp3.id, base_annual=80000, bonus_annual=0, currency="USD", effective_date=date(2020, 1, 1), is_current=True)
+    c1 = Compensation(
+        employee_id=emp1.id,
+        base_annual=100000,
+        bonus_annual=0,
+        currency="USD",
+        effective_date=date(2020, 1, 1),
+        is_current=True,
+    )
+    c2 = Compensation(
+        employee_id=emp2.id,
+        base_annual=120000,
+        bonus_annual=0,
+        currency="USD",
+        effective_date=date(2020, 1, 1),
+        is_current=True,
+    )
+    c3 = Compensation(
+        employee_id=emp3.id,
+        base_annual=80000,
+        bonus_annual=0,
+        currency="USD",
+        effective_date=date(2020, 1, 1),
+        is_current=True,
+    )
     db_session.add_all([c1, c2, c3])
     await db_session.commit()
 
-    login_response = await client.post("/auth/login", json={"email": "hr@example.com", "password": "testpassword"})
+    login_response = await client.post(
+        "/auth/login", json={"email": "hr@example.com", "password": "testpassword"}
+    )
     token = login_response.json()["access_token"]
 
     # Breakdown by department
-    response = await client.get("/analytics/breakdown?group_by=department", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(
+        "/analytics/breakdown?group_by=department", headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["group_by"] == "department"
     assert len(data["items"]) == 2
-    
+
     eng = next(item for item in data["items"] if item["dimension_value"] == "Engineering")
     assert eng["count"] == 2
     assert eng["avg_usd"] == 110000.0
@@ -194,7 +349,9 @@ async def test_get_analytics_breakdown_success(client: AsyncClient, db_session: 
     assert hr["avg_usd"] == 80000.0
 
     # Breakdown by country
-    response = await client.get("/analytics/breakdown?group_by=country", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(
+        "/analytics/breakdown?group_by=country", headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 200
     data = response.json()
     assert len(data["items"]) == 2
