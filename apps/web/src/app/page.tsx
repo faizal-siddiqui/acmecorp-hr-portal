@@ -42,7 +42,7 @@ export default function HomePage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-4 sm:p-8">
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Salary Management</h1>
         <p className="text-muted-foreground text-sm">

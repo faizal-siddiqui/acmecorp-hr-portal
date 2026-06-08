@@ -183,7 +183,7 @@ function EmployeesPageContent() {
   };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Employee Directory</h1>
@@ -428,7 +428,7 @@ function EmployeesPageContent() {
 export default function EmployeesPage() {
   return (
     <Suspense fallback={
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6">
           <div>
             <Skeleton className="h-10 w-64 mb-2" />

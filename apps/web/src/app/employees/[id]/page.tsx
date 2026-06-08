@@ -72,7 +72,7 @@ export default function EmployeeDetailPage({ params }: PageProps) {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-10 px-4">
+      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <Button variant="ghost" className="mb-6" disabled>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Directory
         </Button>
@@ -91,7 +91,7 @@ export default function EmployeeDetailPage({ params }: PageProps) {
 
   if (error || !employee) {
     return (
-      <div className="container mx-auto py-20 px-4 text-center">
+      <div className="container mx-auto py-20 px-4 sm:px-6 lg:px-8 text-center">
         <div className="max-w-md mx-auto">
           <div className="bg-red-50 text-red-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
             <ShieldCheck className="h-8 w-8" />
@@ -123,7 +123,7 @@ export default function EmployeeDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="container mx-auto py-10 px-4">
+    <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
       <Button 
         variant="ghost" 
         className="mb-6 hover:bg-muted"
