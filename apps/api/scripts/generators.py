@@ -1,7 +1,7 @@
 import random
-from faker import Faker
-from typing import Dict, List, Tuple, Optional
 from datetime import date, timedelta
+
+from faker import Faker
 
 # Fixed seed for reproducibility
 DEFAULT_SEED = 42
@@ -37,7 +37,7 @@ LEVELS = ["L1", "L2", "L3", "L4", "L5", "L6", "L7"]
 
 # Base salary bands in USD (min, max) for each level
 # These are "global" base bands that will be adjusted by country cost_factor
-SALARY_BANDS: Dict[str, Tuple[int, int]] = {
+SALARY_BANDS: dict[str, tuple[int, int]] = {
     "L1": (40000, 60000),
     "L2": (60000, 90000),
     "L3": (90000, 130000),
@@ -59,7 +59,7 @@ class DataGenerator:
     def __init__(self, seed: int = DEFAULT_SEED):
         self.fake = get_faker(seed)
 
-    def random_country(self) -> Dict:
+    def random_country(self) -> dict:
         return self.fake.random_element(COUNTRIES)
 
     def random_department(self) -> str:
@@ -114,7 +114,7 @@ class DataGenerator:
         """Generates a status: 95% active, 5% inactive."""
         return random.choices(["active", "inactive"], weights=[0.95, 0.05], k=1)[0]
 
-    def generate_employee_basic(self, level: str, country: Dict) -> Dict:
+    def generate_employee_basic(self, level: str, country: dict) -> dict:
         """Generates basic employee info (name, email, code)."""
         first_name = self.fake.first_name()
         last_name = self.fake.last_name()

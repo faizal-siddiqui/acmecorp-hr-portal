@@ -9,13 +9,13 @@ ALTER TABLE natively; it is safe and a no-op on Postgres.
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
-from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import create_async_engine
 
+from alembic import context
+from app import models  # noqa: F401
 from app.config import settings
 from app.database import Base
-from app import models  # noqa: F401
 
 # Make alembic's logging config take effect if present
 alembic_config = context.config
