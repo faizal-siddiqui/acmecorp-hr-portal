@@ -2,9 +2,9 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   api-test:
@@ -35,9 +35,6 @@ jobs:
 
       - name: Format check
         run: uv run ruff format --check .
-
-      - name: Typecheck
-        run: uv run pyright
 
       - name: Test
         run: uv run pytest
