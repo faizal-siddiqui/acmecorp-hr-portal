@@ -12,7 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   api:
-    image: ${API_IMAGE:-ghcr.io/your-username/salary-management-api:main}
+    image: ${API_IMAGE:-ghcr.io/faizal-siddiqui/acmecorp-hr-portal-api:main}
     restart: always
     environment:
       DATABASE_URL: postgresql+asyncpg://${DB_USER:-salary}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-salary_management}
